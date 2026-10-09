@@ -16,6 +16,16 @@ repositories {
         url = 'https://maven.blamejared.com/'
         content { includeGroup 'mezz.jei' }
     }
+    exclusiveContent {
+        // Modrinth Maven: used for the Energy Meter mod (dev runs only)
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        filter { includeGroup 'maven.modrinth' }
+    }
     maven {
         // JEI mirror and Mekanism
         name = 'ModMaven'
@@ -89,6 +99,11 @@ dependencies {
         runtimeOnly "mekanism:Mekanism:${mekanism_version}:additions"    // Mekanism: Additions
         runtimeOnly "mekanism:Mekanism:${mekanism_version}:generators"   // Mekanism: Generators
         runtimeOnly "mekanism:Mekanism:${mekanism_version}:tools"        // Mekanism: Tools
+    }
+
+    if (project.use_energymeter_runtime.toBoolean()) {
+        // Energy Meter (https://modrinth.com/mod/energymeter) in the development runs only, to measure the generator's FE/t.
+        runtimeOnly "maven.modrinth:energymeter:${energymeter_version}"
     }
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
