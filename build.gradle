@@ -17,10 +17,13 @@ repositories {
         content { includeGroup 'mezz.jei' }
     }
     maven {
-        // JEI mirror
+        // JEI mirror and Mekanism
         name = 'ModMaven'
         url = 'https://modmaven.dev/'
-        content { includeGroup 'mezz.jei' }
+        content {
+            includeGroup 'mezz.jei'
+            includeGroup 'mekanism'
+        }
     }
 }
 
@@ -76,6 +79,16 @@ dependencies {
     if (project.use_jei_runtime.toBoolean()) {
         // Full JEI in the development runs only. Not bundled into the mod jar.
         runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    }
+
+    // Mekanism: compile against the API only (optional integration, not bundled).
+    compileOnly "mekanism:Mekanism:${mekanism_version}:api"
+    if (project.use_mekanism_runtime.toBoolean()) {
+        // Mekanism and its modules in the development runs only, to test FE output into Mekanism cables/machines.
+        runtimeOnly "mekanism:Mekanism:${mekanism_version}"              // core
+        runtimeOnly "mekanism:Mekanism:${mekanism_version}:additions"    // Mekanism: Additions
+        runtimeOnly "mekanism:Mekanism:${mekanism_version}:generators"   // Mekanism: Generators
+        runtimeOnly "mekanism:Mekanism:${mekanism_version}:tools"        // Mekanism: Tools
     }
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
