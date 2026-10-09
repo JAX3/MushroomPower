@@ -1,0 +1,205 @@
+# Default server configuration for Mycelial Power.
+#
+# NeoForge generates this file automatically as <world>/serverconfig/mycelialpower-server.toml the first
+# time a world is loaded. To use custom defaults for every new world, copy it to <instance>/defaultconfigs/.
+# This copy mirrors the defaults declared in ServerConfig.java.
+
+#General machine behaviour.
+[general]
+	#If true, a generator only runs while its tank holds enough water for its next consumption.
+	#If false, water is still consumed when present but its absence never stops the generator.
+	requireWater = true
+	#If true, a generator whose energy buffer is full pauses: it keeps its fuel progress and
+	#consumes no mushrooms or water until energy is extracted. If false, it keeps burning and the
+	#energy that does not fit is discarded.
+	pauseWhenEnergyFull = true
+	#Light level emitted by a running generator (0 disables light).
+	# Default: 10
+	# Range: 0 ~ 15
+	activeLightLevel = 10
+	#If true, right-clicking the generator with a water bucket or other fluid container fills its tank.
+	allowBucketInteraction = true
+
+#Energy generation, storage and output.
+[energy]
+	#Base FE/t produced by one running generator before fuel and network multipliers.
+	# Default: 40.0
+	# Range: 0.0 ~ 1000000.0
+	baseGeneration = 40.0
+	#Internal energy buffer of each generator, in FE.
+	# Default: 100000
+	# Range: 1 ~ 2147483647
+	maxEnergyStorage = 100000
+	#Maximum FE per tick each generator pushes to (or lets be pulled by) neighbouring blocks.
+	# Default: 4000
+	# Range: 0 ~ 2147483647
+	outputTransferRate = 4000
+	#If true, generators actively push energy into adjacent energy receivers (cables, machines).
+	#If false, energy must be pulled out by the neighbouring block.
+	autoOutput = true
+	#Optional maximum total FE/t of one generator network. 0 disables the cap.
+	#When the formula exceeds the cap, every member's output is scaled down proportionally.
+	# Default: 0.0
+	# Range: 0.0 ~ 1.0E12
+	maxNetworkOutput = 0.0
+	#How fractional FE/t values become whole FE each tick:
+	#ACCUMULATE = carry fractions between ticks (exact long-run output),
+	#NEAREST = round each tick, FLOOR = round down, CEILING = round up.
+	#Displayed network totals use NEAREST for ACCUMULATE and the chosen mode otherwise.
+	#Allowed Values: ACCUMULATE, NEAREST, FLOOR, CEILING
+	rounding = "ACCUMULATE"
+
+#Connected generator networks. Generators touching on any of their six faces form one network.
+#Network FE/t = baseGeneration x Generators x scalingMultiplier ^ (Generators - 1)
+[network]
+	#If false, every generator produces baseGeneration x fuel multiplier regardless of its network.
+	scalingEnabled = true
+	#Exponential scaling multiplier applied per additional counted generator.
+	# Default: 1.2
+	# Range: 0.1 ~ 10.0
+	scalingMultiplier = 1.2
+	#Maximum number of generators in one network. Extra generators form separate networks.
+	# Default: 64
+	# Range: 1 ~ 1024
+	maxNetworkSize = 64
+	#If true, idle generators (no fuel, no water or full) also count towards the exponent.
+	#If false (default), only generators that are actively consuming mushrooms and water count.
+	countInactiveGenerators = false
+	#If true, placing a generator that touches two separate networks merges them.
+	#If false, a new generator joins only the largest touching network and existing networks never merge.
+	mergeNetworks = true
+	#If true, generators in one network share water (a dry generator drinks from its neighbours'
+	#tanks) and energy (production that does not fit in a full buffer flows into members with space).
+	shareResources = false
+
+#Mushroom fuels. Each entry is a string: "<item id or #tag>;burn=<ticks>;energy=<x>;water=<x>;mycelium=<x>;scaling=<x>"
+#  burn     (required) ticks of generation per item, 1-1000000
+#  energy   multiplier on the base FE/t (default 1.0)
+#  water    multiplier on water consumption (default 1.0)
+#  mycelium multiplier on the mycelium chance increase per failed attempt (default 1.0)
+#  scaling  bonus added to the network scaling multiplier for this generator's own output (default 0.0)
+#Exact item entries take priority over tag entries. Example for another mod: "#c:mushrooms;burn=400"
+[fuel]
+	#Accepted mushroom fuels.
+	fuels = ["minecraft:brown_mushroom;burn=400;energy=1.0;water=1.0;mycelium=1.0;scaling=0.0", "minecraft:red_mushroom;burn=600;energy=1.25;water=1.0;mycelium=1.0;scaling=0.0"]
+
+#Water tank and consumption.
+[water]
+	#Water tank capacity of each generator in mB. Lowering it discards water above the new capacity.
+	# Default: 8000
+	# Range: 1000 ~ 1000000
+	tankCapacity = 8000
+	#mB of water a running generator consumes every 'consumptionInterval' ticks (before fuel multipliers).
+	# Default: 10
+	# Range: 0 ~ 100000
+	consumptionAmount = 10
+	#Ticks between water consumptions.
+	# Default: 20
+	# Range: 1 ~ 72000
+	consumptionInterval = 20
+	#If true, each generator's water use is also multiplied by its network scaling factor
+	#(scalingMultiplier ^ (Generators - 1)). Total network use always grows with the number of active generators.
+	scaleConsumptionWithNetwork = false
+	#Fluids accepted into the tank. Fluid ids or #tags.
+	acceptedFluids = ["minecraft:water"]
+	#If true, pipes and buckets may drain water back out of a generator.
+	allowFluidExtraction = false
+
+#Mycelium spreading. While running, a generator periodically tries to turn a nearby block into mycelium.
+#Each eligible attempt (one with at least one valid target) that fails raises the chance; at 100% the next attempt always succeeds.
+#All chances are fractions: 0.01 = 1%.
+[mycelium]
+	#Enable mycelium conversion.
+	enabled = true
+	#Chance of the first attempt, and the value the chance resets to.
+	# Default: 0.01
+	# Range: 0.0 ~ 1.0
+	initialChance = 0.01
+	#Increase in chance after each unsuccessful eligible attempt (0.005 = +0.5 percentage points).
+	# Default: 0.005
+	# Range: 0.0 ~ 1.0
+	chanceIncrease = 0.005
+	#Upper limit of the chance. With 1.0 the attempt after reaching the limit is guaranteed to succeed.
+	# Default: 1.0
+	# Range: 0.0 ~ 1.0
+	maxChance = 1.0
+	#Ticks a generator must run between conversion attempts.
+	# Default: 100
+	# Range: 1 ~ 72000
+	attemptInterval = 100
+	#Radius (in blocks, on every axis) of the cube searched for convertible blocks.
+	# Default: 4
+	# Range: 0 ~ 8
+	searchRadius = 4
+	#Blocks converted by one successful attempt (before network bonuses).
+	# Default: 1
+	# Range: 1 ~ 64
+	maxConversionsPerAttempt = 1
+	#If true, only minecraft:dirt is converted. If false, the 'convertibleBlocks' list is used instead.
+	onlyDirt = true
+	#Blocks (ids or #tags) that may be converted when onlyDirt = false.
+	convertibleBlocks = ["minecraft:dirt", "minecraft:coarse_dirt", "minecraft:rooted_dirt"]
+	#Block placed by a successful conversion.
+	resultBlock = "minecraft:mycelium"
+	#If true, the block above the target must be air.
+	requireAirAbove = true
+	#If true, the block above the target must have at least 'minimumLightLevel' light.
+	requireLight = false
+	#Minimum light level used when requireLight = true (vanilla mycelium spreading uses 9).
+	# Default: 9
+	# Range: 0 ~ 15
+	minimumLightLevel = 9
+	#If true, the chance resets to initialChance after a successful conversion.
+	resetChanceOnSuccess = true
+	#If true, the chance resets to initialChance whenever the generator stops running.
+	resetChanceOnStop = false
+	#If true, all generators in a network share (and together raise) one conversion chance.
+	shareChanceAcrossNetwork = false
+	#If true, larger networks raise the chance faster:
+	#increase x (1 + growthBonusPerGenerator x (ActiveGenerators - 1)).
+	networkIncreasesGrowthRate = false
+	#Growth rate bonus per additional active generator in the network.
+	# Default: 0.1
+	# Range: 0.0 ~ 10.0
+	growthBonusPerGenerator = 0.1
+	#If true, larger networks convert extra blocks per successful attempt.
+	networkExtraConversions = false
+	#One extra conversion per this many active generators in the network.
+	# Default: 4
+	# Range: 1 ~ 1024
+	generatorsPerExtraConversion = 4
+	#Upper limit of extra conversions from network size.
+	# Default: 4
+	# Range: 0 ~ 64
+	maxExtraConversions = 4
+	#If true, the GUI shows how many blocks each generator converted since it was loaded.
+	trackConversions = true
+
+#Performance tuning.
+[performance]
+	#Ticks between GUI updates sent to players viewing a generator.
+	# Default: 5
+	# Range: 1 ~ 100
+	guiSyncInterval = 5
+	#Ticks between attempts to empty fluid containers placed in the bucket slot.
+	# Default: 10
+	# Range: 1 ~ 200
+	containerProcessInterval = 10
+	#Ticks between energy pushes to neighbours. Each push sends up to outputTransferRate x interval FE.
+	# Default: 1
+	# Range: 1 ~ 20
+	energyOutputInterval = 1
+
+#Compatibility with other mods.
+[compatibility]
+	#If true, each mycelium conversion fires a block place event as a fake player so protection
+	#mods (claims, regions) can cancel it.
+	firePlaceEvents = true
+	#If true, conversions never happen inside vanilla spawn protection or outside the world border.
+	respectSpawnProtection = true
+	#Name of the fake player used for protection checks.
+	fakePlayerName = "[MycelialPower]"
+	#Largest network size listed in the JEI scaling tooltip.
+	# Default: 10
+	# Range: 1 ~ 64
+	jeiExampleNetworkSize = 10

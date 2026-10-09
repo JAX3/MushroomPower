@@ -1,0 +1,13 @@
+{
+  "block.mycelial_generator.running": {
+    "subtitle": "subtitles.mycelialpower.generator_running",
+    "sounds": [
+      {
+        "name": "minecraft:block/beacon/ambient",
+        "volume": 0.5,
+        "pitch": 0.6,
+        "attenuation_distance": 10
+      }
+    ]
+  }
+}
