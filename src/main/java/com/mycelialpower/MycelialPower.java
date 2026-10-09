@@ -7,17 +7,16 @@ import com.mycelialpower.event.CommonEvents;
 import com.mycelialpower.net.ModNetworking;
 import com.mycelialpower.registry.ModBlockEntities;
 import com.mycelialpower.registry.ModBlocks;
+import com.mycelialpower.registry.ModCreativeTabs;
 import com.mycelialpower.registry.ModItems;
 import com.mycelialpower.registry.ModMenus;
 import com.mycelialpower.registry.ModSounds;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +31,7 @@ public final class MycelialPower {
         ModBlockEntities.BLOCK_ENTITY_TYPES.register(modBus);
         ModMenus.MENUS.register(modBus);
         ModSounds.SOUNDS.register(modBus);
+        ModCreativeTabs.CREATIVE_TABS.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
@@ -40,7 +40,6 @@ public final class MycelialPower {
         modBus.addListener(ModNetworking::register);
         modBus.addListener(CommonEvents::onConfigLoading);
         modBus.addListener(CommonEvents::onConfigReloading);
-        modBus.addListener(MycelialPower::addToCreativeTabs);
 
         NeoForge.EVENT_BUS.addListener(CommonEvents::onServerStopped);
         NeoForge.EVENT_BUS.addListener(CommonEvents::onLevelUnload);
@@ -50,11 +49,5 @@ public final class MycelialPower {
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
-    }
-
-    private static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS || event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
-            event.accept(ModItems.MYCELIAL_GENERATOR.get());
-        }
     }
 }
