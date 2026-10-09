@@ -8,14 +8,22 @@ import com.mycelialpower.util.NumberFormatting;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.handlers.IGuiClickableArea;
+import mezz.jei.api.gui.handlers.IGuiContainerHandler;
+import mezz.jei.api.recipe.IFocusFactory;
+import mezz.jei.api.runtime.IRecipesGui;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * JEI entry point. Loaded only by JEI, so the mod has no hard dependency on it. All displayed values
@@ -78,8 +86,35 @@ public class MycelialPowerJeiPlugin implements IModPlugin {
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-        registration.addRecipeClickArea(MycelialGeneratorScreen.class, MycelialGeneratorScreen.BURN_X, MycelialGeneratorScreen.BURN_Y,
-                MycelialGeneratorScreen.BURN_W, MycelialGeneratorScreen.BURN_H, MycelialGeneratorCategory.TYPE);
+        // A plain addRecipeClickArea would draw JEI's own "Show Recipes" tooltip on top of the screen's burn
+        // tooltip. This click area has no tooltip; the screen adds a "click to show fuels" hint instead.
+        registration.addGuiContainerHandler(MycelialGeneratorScreen.class, new IGuiContainerHandler<>() {
+            @Override
+            public Collection<IGuiClickableArea> getGuiClickableAreas(MycelialGeneratorScreen screen, double guiMouseX, double guiMouseY) {
+                return List.of(new IGuiClickableArea() {
+                    @Override
+                    public Rect2i getArea() {
+                        return new Rect2i(MycelialGeneratorScreen.BURN_X, MycelialGeneratorScreen.BURN_Y,
+                                MycelialGeneratorScreen.BURN_W, MycelialGeneratorScreen.BURN_H);
+                    }
+
+                    // Not annotated: only some JEI 19.x builds declare it. Where present it stops the tooltip outright.
+                    public boolean isTooltipEnabled() {
+                        return false;
+                    }
+
+                    @Override
+                    public List<Component> getTooltipStrings() {
+                        return List.of();
+                    }
+
+                    @Override
+                    public void onClick(IFocusFactory focusFactory, IRecipesGui recipesGui) {
+                        recipesGui.showTypes(List.of(MycelialGeneratorCategory.TYPE));
+                    }
+                });
+            }
+        });
     }
 
     @Override

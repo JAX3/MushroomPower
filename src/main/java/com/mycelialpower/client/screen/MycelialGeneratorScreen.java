@@ -21,6 +21,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -41,6 +42,7 @@ public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGen
     public static final int LAMP_X = 8, LAMP_Y = 112;
     public static final int PANEL_X = 78, PANEL_Y = 19, PANEL_W = 170, ROW_H = 11;
     private static final float TEXT_SCALE = 0.75F;
+    private static final boolean JEI_LOADED = ModList.get().isLoaded("jei");
 
     private static final int COLOR_HEADER = 0xFFB98CFF;
     private static final int COLOR_TEXT = 0xFFDCDCE6;
@@ -261,11 +263,15 @@ public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGen
                 Component.translatable("gui.mycelialpower.tooltip.water.rate", NumberFormatting.decimal(s.waterPerInterval()),
                         NumberFormatting.grouped(s.waterInterval())).withStyle(ChatFormatting.GRAY),
                 Component.translatable("gui.mycelialpower.tooltip.water.fill").withStyle(ChatFormatting.DARK_GRAY))));
-        hoverAreas.add(new HoverArea(BURN_X, BURN_Y, BURN_W, BURN_H, List.of(
+        List<Component> burnTooltip = new ArrayList<>(List.of(
                 s.fuelItem().isEmpty() ? Component.translatable("gui.mycelialpower.fuel.none")
                         : fuelName(s.fuelItem()).copy().withStyle(ChatFormatting.GOLD),
                 Component.translatable("gui.mycelialpower.tooltip.fuel.remaining", NumberFormatting.grouped(s.burnRemaining()),
-                        NumberFormatting.grouped(s.burnTotal())).withStyle(ChatFormatting.GRAY))));
+                        NumberFormatting.grouped(s.burnTotal())).withStyle(ChatFormatting.GRAY)));
+        if (JEI_LOADED) {
+            burnTooltip.add(Component.translatable("gui.mycelialpower.tooltip.fuel.show_recipes").withStyle(ChatFormatting.DARK_GRAY));
+        }
+        hoverAreas.add(new HoverArea(BURN_X, BURN_Y, BURN_W, BURN_H, burnTooltip));
     }
 
     private void row(GuiGraphics graphics, int index, String headerKey, Component value, List<Component> tooltip) {

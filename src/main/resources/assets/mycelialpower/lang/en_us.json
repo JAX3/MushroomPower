@@ -147,5 +147,6 @@
   "mycelialpower.configuration.section.mycelialpower.server.toml": "Server settings",
   "mycelialpower.configuration.section.mycelialpower.server.toml.title": "Mycelial Power server settings",
   "mycelialpower.configuration.section.mycelialpower.client.toml": "Client settings",
-  "mycelialpower.configuration.section.mycelialpower.client.toml.title": "Mycelial Power client settings"
+  "mycelialpower.configuration.section.mycelialpower.client.toml.title": "Mycelial Power client settings",
+  "gui.mycelialpower.tooltip.fuel.show_recipes": "Click to show all mushroom fuels"
 }
