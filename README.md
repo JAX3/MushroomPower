@@ -105,10 +105,13 @@ The build downloads from `maven.neoforged.net` (NeoForge, ModDevGradle tooling),
 
 ### Regenerating textures and models
 
-Textures, block models, the blockstate and the GameTest structure come from `tools/generate_assets.py` (Python 3 + Pillow):
+The art is made by a separate Python tool in [`tools/texture-generator`](tools/texture-generator/README.md). Gradle never runs it, and it writes to its own `output/` folder unless you point it at the mod:
 
 ```bash
-python3 tools/generate_assets.py
+cd tools/texture-generator
+pip install -r requirements.txt
+python generate.py --preview                          # review in ./output
+python generate.py -o ../../src/main/resources        # write into the mod on purpose
 ```
 
 ---
