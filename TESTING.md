@@ -41,7 +41,7 @@ Run `./gradlew runClient` and create a **creative, superflat** world with cheats
 
 ### Generator basics
 1. Place a generator, right-click it with a water bucket, and put red mushrooms in the top slot. The lamp turns green and the GUI shows **+50 FE/t**.
-2. Put an Energy Meter between the generator and a Mekanism cable or machine. It should read about 50 FE/t.
+2. Connect a Mekanism cable or machine. Energy flows out, and the GUI's *out* value rises to match.
 3. Place 3 touching generators, all fed. Each GUI shows **3 linked, 3 active**, **x1.44** and a total of about **173 FE/t** (on brown mushrooms; red ones run 1.25× higher).
 4. Hover the orange burn box. You should see one clean tooltip. With JEI installed, clicking it opens the fuel list.
 
