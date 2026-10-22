@@ -14,10 +14,10 @@ public record GeneratorStatus(
         int networkSize, int networkActive, double networkScale, double networkTotal, int networkStatus, int maxNetworkSize,
         boolean myceliumEnabled, double chance, double chanceIncrease, int attemptProgress, int attemptInterval,
         int converted, boolean trackConversions,
-        int state) {
+        int state, int manualLinks, int activeManualLinks, int maxManualLinks, int connectionType) {
 
     public static final GeneratorStatus EMPTY = new GeneratorStatus(0, 1, 0, false, 0, "", 0, 1, 0, 20, "", 0, 0,
-            1, 0, 1, 0, 1, 64, false, 0, 0, 0, 100, 0, false, 1);
+            1, 0, 1, 0, 1, 64, false, 0, 0, 0, 100, 0, false, 1, 0, 0, 8, 0);
 
     public static final StreamCodec<FriendlyByteBuf, GeneratorStatus> STREAM_CODEC = StreamCodec.of(
             (buf, s) -> s.write(buf), GeneratorStatus::read);
@@ -50,6 +50,10 @@ public record GeneratorStatus(
         buf.writeVarInt(converted);
         buf.writeBoolean(trackConversions);
         buf.writeVarInt(state);
+        buf.writeVarInt(manualLinks);
+        buf.writeVarInt(activeManualLinks);
+        buf.writeVarInt(maxManualLinks);
+        buf.writeVarInt(connectionType);
     }
 
     private static GeneratorStatus read(FriendlyByteBuf buf) {
@@ -60,6 +64,6 @@ public record GeneratorStatus(
                 buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readVarInt(), buf.readVarInt(),
                 buf.readBoolean(), buf.readDouble(), buf.readDouble(), buf.readVarInt(), buf.readVarInt(),
                 buf.readVarInt(), buf.readBoolean(),
-                buf.readVarInt());
+                buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
     }
 }

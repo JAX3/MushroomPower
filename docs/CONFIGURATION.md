@@ -17,7 +17,7 @@ NeoForge watches the server file while the world runs and reloads it when it is 
 |---|---|
 | Energy, water, mycelium, performance and compatibility values | Next tick |
 | `tankCapacity`, `maxEnergyStorage` | Next tick. Lowering them discards water or FE above the new limit. |
-| `maxNetworkSize`, `mergeNetworks`, `scalingEnabled` | All networks are rebuilt on the next tick |
+| `maxNetworkSize`, `mergeNetworks`, `scalingEnabled`, all `[network.wrench]` values | All networks are rebuilt on the next tick |
 | `fuels`, `acceptedFluids`, `convertibleBlocks`, `resultBlock` | Next lookup (cache rebuilt). A mushroom that is already burning keeps the values it started with. |
 | `activeLightLevel` | The next time each generator changes state |
 | JEI display | **Rejoin the world.** JEI builds its recipe list when you join. |
@@ -59,8 +59,25 @@ Each generator produces `baseGeneration × fuelEnergy × (scalingMultiplier + fu
 | `scalingMultiplier` | `1.2` | 0.1–10 | Exponential multiplier per extra generator. |
 | `maxNetworkSize` | `64` | 1–1024 | Members per network. Extra touching generators form a separate network. |
 | `countInactiveGenerators` | `false` | | If `true`, idle members also count towards N. |
-| `mergeNetworks` | `true` | | If `false`, a new generator joins only the largest touching network and networks never merge. Membership is stored per generator, so it survives reloads. |
+| `mergeNetworks` | `true` | | If `false`, a new generator joins only the largest touching network, and touching networks never merge. Membership is stored per generator, so it survives reloads. Wrench links are a deliberate choice and always connect; use `allow_network_merging` to control them. |
 | `shareResources` | `false` | | Members share water (drink from neighbours' tanks) and energy (overflow goes into members with space). |
+
+## `[network.wrench]`
+
+Settings for the **Mycelium Wrench**, which links generators that are not touching. A manual link counts exactly like a touching face: both generators join one network and count towards `N` in the exponential formula. Each generator still keeps its own mushrooms, water and energy unless `shareResources = true`.
+
+| Key | Default | Range | Description |
+|---|---|---|---|
+| `enabled` | `true` | | Enable the wrench. When `false`, it cannot create links and existing links stop counting. They are kept, and count again when re-enabled. |
+| `max_link_distance` | `64` | 1–4096 | Maximum straight-line distance (in blocks) between two linked generators. If you lower it, longer existing links stop counting until you raise it again. |
+| `max_manual_connections_per_generator` | `8` | 1–64 | Manual links per generator. Touching neighbours don't count. |
+| `allow_cross_dimension_links` | `false` | | Allow links between dimensions (distance is ignored for these). Only works when `require_same_dimension = false`. |
+| `require_same_dimension` | `true` | | Keep links within one dimension. **Overrides** `allow_cross_dimension_links`. |
+| `wrench_durability` | `0` | 0–1,000,000 | Successful links per wrench before it breaks. `0` = unlimited. Creative-mode players never use it up. |
+| `allow_network_merging` | `true` | | If `false`, a link that would join two different multi-generator networks is refused. A lone generator can still be linked into a network. |
+| `show_link_particles` | `true` | | Green fungal particles along new links, and a purple outline on the selected generator. |
+
+Where links are stored: in the world's `data/mycelialpower_generator_links.dat`, not in the generators. That's why breaking a generator removes its links from both ends without loading the other generator's chunk. A link to a generator in an unloaded chunk is kept, and counts again once both chunks are loaded.
 
 ## `[fuel]`
 

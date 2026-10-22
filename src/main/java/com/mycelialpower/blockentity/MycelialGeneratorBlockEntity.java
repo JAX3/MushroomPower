@@ -15,13 +15,17 @@ import com.mycelialpower.menu.GeneratorStatus;
 import com.mycelialpower.menu.MycelialGeneratorMenu;
 import com.mycelialpower.mycelium.MyceliumChance;
 import com.mycelialpower.mycelium.MyceliumSpreadManager;
+import com.mycelialpower.network.ConnectionType;
 import com.mycelialpower.network.GeneratorNetwork;
 import com.mycelialpower.network.GeneratorNetworkManager;
+import com.mycelialpower.network.ManualLinkData;
+import com.mycelialpower.network.ManualLinking;
 import com.mycelialpower.network.NetworkMath;
 import com.mycelialpower.network.NetworkStatus;
 import com.mycelialpower.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -108,6 +112,9 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
     private int outputTimer;
     private int containerTimer;
     private boolean registered;
+    private boolean linksChecked;
+    @Nullable
+    private GlobalPos globalPos;
     private int lastComparatorSignal = -1;
 
     public MycelialGeneratorBlockEntity(BlockPos pos, BlockState blockState) {
@@ -169,9 +176,13 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
             manager.add(this);
             registered = true;
         }
+        if (!linksChecked) {
+            linksChecked = true;
+            ManualLinking.pruneStaleLinks(level, worldPosition);
+        }
         GeneratorNetwork network = manager.getNetwork(this);
-        long gameTime = level.getGameTime();
-        network.refresh(gameTime);
+        // Server tick count (not level game time) so members in different dimensions share one refresh clock.
+        network.refresh(level.getServer().getTickCount());
 
         tank.syncCapacity();
         energy.clampToCapacity();
@@ -530,7 +541,10 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
 
     /** Builds the snapshot sent to players viewing this generator. */
     public GeneratorStatus createStatus() {
-        GeneratorNetwork network = level instanceof ServerLevel serverLevel ? GeneratorNetworkManager.get(serverLevel).getNetwork(this) : null;
+        GeneratorNetworkManager manager = level instanceof ServerLevel serverLevel ? GeneratorNetworkManager.get(serverLevel) : null;
+        GeneratorNetwork network = manager != null ? manager.getNetwork(this) : null;
+        ConnectionType connection = manager != null ? manager.connectionType(this) : ConnectionType.NONE;
+        int activeLinks = manager != null ? manager.activeManualLinks(this) : 0;
         int size = network == null ? 1 : network.size();
         int activeMembers = network == null ? (active ? 1 : 0) : network.activeCount();
         double scale = network == null ? 1.0D : network.scaleFactor();
@@ -551,7 +565,22 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
                 size, activeMembers, scale, total, networkStatus.ordinal(), ServerConfig.get(ServerConfig.MAX_NETWORK_SIZE),
                 ServerConfig.get(ServerConfig.MYCELIUM_ENABLED), shownChance, increase, attemptTimer,
                 ServerConfig.get(ServerConfig.ATTEMPT_INTERVAL), convertedThisSession, ServerConfig.get(ServerConfig.TRACK_CONVERSIONS),
-                state.ordinal());
+                state.ordinal(),
+                manualLinkCount(), activeLinks, ServerConfig.get(ServerConfig.MAX_MANUAL_CONNECTIONS), connection.ordinal());
+    }
+
+    private int manualLinkCount() {
+        return level instanceof ServerLevel serverLevel ? ManualLinkData.get(serverLevel.getServer()).count(getGlobalPos()) : 0;
+    }
+
+    /** This generator's position including its dimension; the key used by the network manager and link data. */
+    public GlobalPos getGlobalPos() {
+        GlobalPos pos = globalPos;
+        if (pos == null || level != null && !pos.dimension().equals(level.dimension())) {
+            pos = GlobalPos.of(level == null ? Level.OVERWORLD : level.dimension(), worldPosition);
+            globalPos = pos;
+        }
+        return pos;
     }
 
     /** Output this generator would have if it were running now (for the idle GUI). */

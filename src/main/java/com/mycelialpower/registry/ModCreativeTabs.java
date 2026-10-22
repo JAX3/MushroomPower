@@ -18,7 +18,10 @@ public final class ModCreativeTabs {
                     .title(Component.translatable("itemGroup.mycelialpower"))
                     .icon(() -> new ItemStack(ModItems.MYCELIAL_GENERATOR.get()))
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
-                    .displayItems((parameters, output) -> output.accept(ModItems.MYCELIAL_GENERATOR.get()))
+                    .displayItems((parameters, output) -> {
+                        output.accept(ModItems.MYCELIAL_GENERATOR.get());
+                        output.accept(ModItems.MYCELIUM_WRENCH.get());
+                    })
                     .build());
 
     private ModCreativeTabs() {

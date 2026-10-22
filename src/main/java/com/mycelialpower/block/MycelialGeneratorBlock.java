@@ -4,12 +4,15 @@ import com.mojang.serialization.MapCodec;
 import com.mycelialpower.blockentity.MycelialGeneratorBlockEntity;
 import com.mycelialpower.config.ClientConfig;
 import com.mycelialpower.config.ServerConfig;
+import com.mycelialpower.item.MyceliumWrenchItem;
+import com.mycelialpower.network.ManualLinking;
 import com.mycelialpower.registry.ModBlockEntities;
 import com.mycelialpower.registry.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -116,6 +119,10 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                               InteractionHand hand, BlockHitResult hitResult) {
+        if (stack.getItem() instanceof MyceliumWrenchItem) {
+            // Let the wrench's own useOn handle the click instead of opening the GUI.
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        }
         if (ServerConfig.get(ServerConfig.ALLOW_BUCKET_INTERACTION)
                 && FluidUtil.getFluidHandler(stack).isPresent()
                 && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hitResult.getDirection())) {
@@ -130,6 +137,10 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
             if (level.getBlockEntity(pos) instanceof MycelialGeneratorBlockEntity generator) {
                 generator.dropContents(level, pos);
                 level.updateNeighbourForOutputSignal(pos, this);
+            }
+            // Permanently destroyed (not a chunk unload): drop its manual links from both ends.
+            if (level instanceof ServerLevel serverLevel) {
+                ManualLinking.onGeneratorDestroyed(serverLevel, pos);
             }
         }
         super.onRemove(state, level, pos, newState, movedByPiston);

@@ -7,6 +7,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -17,6 +18,7 @@ public final class MycelialPowerClient {
     public MycelialPowerClient(IEventBus modBus, ModContainer container) {
         modBus.addListener(MycelialPowerClient::registerScreens);
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        NeoForge.EVENT_BUS.addListener(WrenchClientEffects::onClientTick);
     }
 
     private static void registerScreens(RegisterMenuScreensEvent event) {

@@ -8,6 +8,7 @@ import com.mycelialpower.net.ModNetworking;
 import com.mycelialpower.registry.ModBlockEntities;
 import com.mycelialpower.registry.ModBlocks;
 import com.mycelialpower.registry.ModCreativeTabs;
+import com.mycelialpower.registry.ModDataComponents;
 import com.mycelialpower.registry.ModItems;
 import com.mycelialpower.registry.ModMenus;
 import com.mycelialpower.registry.ModSounds;
@@ -32,6 +33,7 @@ public final class MycelialPower {
         ModMenus.MENUS.register(modBus);
         ModSounds.SOUNDS.register(modBus);
         ModCreativeTabs.CREATIVE_TABS.register(modBus);
+        ModDataComponents.COMPONENTS.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);

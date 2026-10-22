@@ -2,13 +2,13 @@
 
 **Turn mushrooms and water into Forge Energy, and watch your power grow exponentially as you build bigger generator farms.**
 
-Mycelial Power adds a single machine, the **Mycelial Generator**: an industrial fungal reactor that burns mushrooms, drinks water and pushes **Forge Energy (FE)** into any cable or machine that accepts it. Place generators next to each other and they link into a network that gets stronger with every generator you add. Leave them running and the fungus starts to spread, slowly turning the dirt around them into mycelium.
+Mycelial Power adds the **Mycelial Generator**: an industrial fungal reactor that burns mushrooms, drinks water and pushes **Forge Energy (FE)** into any cable or machine that accepts it. Place generators next to each other and they link into a network that gets stronger with every generator you add. Leave them running and the fungus starts to spread, slowly turning the dirt around them into mycelium.
 
 ---
 
 ## ⚡ Features
 
-### One machine, done properly
+### The generator
 - Burns **red and brown mushrooms**. Any other item or item tag can be added as fuel through the config.
 - Built-in **8,000 mB water tank**. Fill it with a bucket, the bucket slot in the GUI, or any fluid pipe.
 - **100,000 FE** internal buffer that **auto-outputs** to adjacent cables and machines, so it works with any FE mod.
@@ -34,6 +34,15 @@ Generators touching on **any of their six faces** automatically form a network. 
 - Networks update instantly as you place or break generators.
 - Capped at 64 generators per network by default, with all calculations protected against overflow.
 - Never loads chunks: generators in unloaded chunks simply stop counting.
+
+### 🔧 Mycelium Wrench: wireless links
+Can't fit your generators side by side? Link them with the **Mycelium Wrench**.
+
+- **Right-click** a generator to select it, then **right-click another** to link them. Green fungal particles show the connection.
+- Linked generators form **one network** and share the full exponential boost, just like touching ones.
+- Mix touching and linked generators freely. The GUI shows whether each one is connected physically, manually or both.
+- **Shift + right-click** a generator to remove its links.
+- Links reach 64 blocks with up to 8 links per generator by default, and are saved with the world. Server owners can change the range, link limit, durability and cross-dimension links.
 
 ### 🌱 Spreading mycelium
 While it runs, a generator tries every few seconds to turn a nearby dirt block into **mycelium**.
@@ -87,13 +96,20 @@ Every number lives in `serverconfig/mycelialpower-server.toml`, with comments ex
 
 ## 🛠️ Crafting
 
+**Mycelial Generator**
 ```
  Iron Ingot    Red Mushroom    Iron Ingot
  Brown Mushr.  Cauldron        Brown Mushr.
  Iron Ingot    Redstone        Iron Ingot
 ```
-
 Mine it with any pickaxe.
+
+**Mycelium Wrench**
+```
+ (empty)       Iron Ingot      Amethyst Shard
+ (empty)       Mycelium        Iron Ingot
+ Red Mushroom  (empty)         (empty)
+```
 
 ---
 

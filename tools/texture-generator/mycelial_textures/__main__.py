@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 
-from . import blocks, gui, models, palette, structure
+from . import blocks, gui, items, models, palette, structure
 
 MOD_ID = "mycelialpower"
 DEFAULT_OUTPUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "output")
@@ -43,6 +43,8 @@ def generate_textures(out):
         save_png(gui.gui_texture(), assets, "textures", "gui", "mycelial_generator.png"),
         save_png(gui.jei_texture(), assets, "textures", "gui", "jei_mycelial_generator.png"),
         save_png(gui.logo(), out, "logo.png"),
+        # New textures go after the existing ones so the seeded random order (and their bytes) stay the same.
+        save_png(items.mycelium_wrench(), assets, "textures", "item", "mycelium_wrench.png"),
     ]
     return written
 
@@ -53,6 +55,8 @@ def generate_models(out):
         save_json(models.generator_model(False), assets, "models", "block", "mycelial_generator.json"),
         save_json(models.generator_model(True), assets, "models", "block", "mycelial_generator_on.json"),
         save_json({"parent": f"{MOD_ID}:block/mycelial_generator"}, assets, "models", "item", "mycelial_generator.json"),
+        save_json({"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD_ID}:item/mycelium_wrench"}},
+                  assets, "models", "item", "mycelium_wrench.json"),
         save_json(models.blockstate(), assets, "blockstates", "mycelial_generator.json"),
     ]
 
@@ -77,6 +81,10 @@ def write_preview(out):
         if os.path.exists(path):
             sheet.paste(Image.open(path).crop((0, 0, 16, 16)), (i * 16, 0))
     written = [save_png(sheet.resize((sheet.width * 8, sheet.height * 8), Image.NEAREST), out, "preview", "blocks.png")]
+    wrench_path = os.path.join(tex, "item", "mycelium_wrench.png")
+    if os.path.exists(wrench_path):
+        wrench = Image.open(wrench_path)
+        written.append(save_png(wrench.resize((wrench.width * 16, wrench.height * 16), Image.NEAREST), out, "preview", "mycelium_wrench.png"))
     gui_path = os.path.join(tex, "gui", "mycelial_generator.png")
     if os.path.exists(gui_path):
         img = Image.open(gui_path)

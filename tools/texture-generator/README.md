@@ -35,10 +35,11 @@ output/
 │   ├── blockstates/mycelial_generator.json
 │   ├── models/block/mycelial_generator.json, mycelial_generator_on.json
 │   ├── models/item/mycelial_generator.json
-│   └── textures/block/*.png (+ .mcmeta), textures/gui/*.png
+│   ├── models/item/mycelium_wrench.json
+│   └── textures/block/*.png (+ .mcmeta), textures/gui/*.png, textures/item/mycelium_wrench.png
 ├── data/mycelialpower/structure/empty.nbt
 ├── logo.png
-└── preview/blocks.png, gui.png        (only with --preview)
+└── preview/blocks.png, gui.png, mycelium_wrench.png   (only with --preview)
 ```
 
 ## Putting results into the mod
@@ -60,6 +61,7 @@ With the default seed (`1337`) the tool reproduces the files that ship with the 
 | `mycelial_textures/palette.py` | Colour helpers, shared colours, the seeded random source |
 | `mycelial_textures/blocks.py` | 16×16 block textures and the 8-frame animated chamber |
 | `mycelial_textures/gui.py` | Machine GUI (256×256), JEI background, logo |
+| `mycelial_textures/items.py` | Hand-placed item icons (Mycelium Wrench), editable as a character grid |
 | `mycelial_textures/models.py` | Block/item models (with mushroom and fungus elements) and the blockstate |
 | `mycelial_textures/structure.py` | Tiny NBT writer for the GameTest structure |
 | `mycelial_textures/__main__.py` | Command line interface |

@@ -4,6 +4,7 @@ import com.mycelialpower.MycelialPower;
 import com.mycelialpower.blockentity.GeneratorState;
 import com.mycelialpower.menu.GeneratorStatus;
 import com.mycelialpower.menu.MycelialGeneratorMenu;
+import com.mycelialpower.network.ConnectionType;
 import com.mycelialpower.network.NetworkStatus;
 import com.mycelialpower.util.NumberFormatting;
 import net.minecraft.ChatFormatting;
@@ -206,21 +207,34 @@ public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGen
                                 .withStyle(ChatFormatting.GRAY)));
 
         // Network
+        ConnectionType connection = ConnectionType.byOrdinal(s.connectionType());
         List<Component> networkTooltip = List.of(
                 Component.translatable("gui.mycelialpower.section.network").withStyle(ChatFormatting.GREEN),
                 Component.translatable("gui.mycelialpower.tooltip.network.formula").withStyle(ChatFormatting.GRAY),
                 Component.translatable("gui.mycelialpower.tooltip.network.members", s.networkSize(), s.maxNetworkSize())
                         .withStyle(ChatFormatting.GRAY),
                 Component.translatable("gui.mycelialpower.tooltip.network.total", NumberFormatting.decimal(s.networkTotal()))
-                        .withStyle(ChatFormatting.GRAY));
+                        .withStyle(ChatFormatting.GRAY),
+                Component.translatable("gui.mycelialpower.tooltip.network.connection", Component.translatable(connection.translationKey()))
+                        .withStyle(ChatFormatting.GRAY),
+                Component.translatable("gui.mycelialpower.tooltip.network.links", s.manualLinks(), s.maxManualLinks(),
+                        s.activeManualLinks()).withStyle(ChatFormatting.GRAY),
+                Component.translatable("gui.mycelialpower.tooltip.network.wrench").withStyle(ChatFormatting.DARK_GRAY));
         row(graphics, 4, "gui.mycelialpower.section.network",
                 Component.translatable("gui.mycelialpower.network.line", s.networkSize(), s.networkActive()), networkTooltip);
         row(graphics, 5, null, Component.translatable("gui.mycelialpower.network.multiplier",
                 NumberFormatting.decimal(s.networkScale()), NumberFormatting.compact(Math.round(s.networkTotal()))), networkTooltip);
         NetworkStatus networkStatus = NetworkStatus.values()[Math.floorMod(s.networkStatus(), NetworkStatus.values().length)];
-        row(graphics, 6, null, Component.translatable("gui.mycelialpower.network.status", Component.translatable(networkStatus.translationKey())),
+        row(graphics, 6, null, Component.translatable("gui.mycelialpower.network.status_links",
+                        Component.translatable(networkStatus.translationKey()), Component.translatable(connection.translationKey()),
+                        s.manualLinks(), s.maxManualLinks()),
                 List.of(Component.translatable(networkStatus.translationKey()).withStyle(ChatFormatting.GREEN),
-                        Component.translatable(networkStatus.translationKey() + ".desc").withStyle(ChatFormatting.GRAY)));
+                        Component.translatable(networkStatus.translationKey() + ".desc").withStyle(ChatFormatting.GRAY),
+                        Component.translatable("gui.mycelialpower.tooltip.network.connection", Component.translatable(connection.translationKey()))
+                                .withStyle(ChatFormatting.GRAY),
+                        Component.translatable(connection.translationKey() + ".desc").withStyle(ChatFormatting.DARK_GRAY),
+                        Component.translatable("gui.mycelialpower.tooltip.network.links", s.manualLinks(), s.maxManualLinks(),
+                                s.activeManualLinks()).withStyle(ChatFormatting.GRAY)));
 
         // Mycelium
         List<Component> myceliumTooltip = List.of(

@@ -40,6 +40,16 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue MERGE_NETWORKS;
     public static final ModConfigSpec.BooleanValue SHARE_RESOURCES;
 
+    // [network.wrench]
+    public static final ModConfigSpec.BooleanValue WRENCH_ENABLED;
+    public static final ModConfigSpec.IntValue MAX_LINK_DISTANCE;
+    public static final ModConfigSpec.IntValue MAX_MANUAL_CONNECTIONS;
+    public static final ModConfigSpec.BooleanValue ALLOW_CROSS_DIMENSION_LINKS;
+    public static final ModConfigSpec.BooleanValue REQUIRE_SAME_DIMENSION;
+    public static final ModConfigSpec.IntValue WRENCH_DURABILITY;
+    public static final ModConfigSpec.BooleanValue ALLOW_LINK_MERGING;
+    public static final ModConfigSpec.BooleanValue SHOW_LINK_PARTICLES;
+
     // [fuel]
     public static final ModConfigSpec.ConfigValue<List<? extends String>> FUELS;
 
@@ -140,6 +150,32 @@ public final class ServerConfig {
         SHARE_RESOURCES = b.comment("If true, generators in one network share water (a dry generator drinks from its neighbours'",
                         "tanks) and energy (production that does not fit in a full buffer flows into members with space).")
                 .define("shareResources", false);
+
+        b.comment("Mycelium Wrench: manual (wireless) links between generators that are not touching.",
+                "Linked generators join one network and count towards the same exponential formula as touching ones.",
+                "Each generator keeps its own fuel, water and energy unless shareResources = true.").push("wrench");
+        WRENCH_ENABLED = b.comment("Enable the Mycelium Wrench. When false, the wrench cannot create links and existing manual links",
+                        "stop counting (they are kept and come back when re-enabled).")
+                .define("enabled", true);
+        MAX_LINK_DISTANCE = b.comment("Maximum straight-line distance in blocks between two linked generators.",
+                        "Existing links longer than a lowered limit stop counting until the limit is raised again.")
+                .defineInRange("max_link_distance", 64, 1, 4096);
+        MAX_MANUAL_CONNECTIONS = b.comment("Maximum manual links per generator (touching neighbours do not count).")
+                .defineInRange("max_manual_connections_per_generator", 8, 1, 64);
+        ALLOW_CROSS_DIMENSION_LINKS = b.comment("Allow linking generators in different dimensions (distance is ignored for such links).",
+                        "Only takes effect when require_same_dimension = false.")
+                .define("allow_cross_dimension_links", false);
+        REQUIRE_SAME_DIMENSION = b.comment("If true, links must stay within one dimension. Overrides allow_cross_dimension_links.")
+                .define("require_same_dimension", true);
+        WRENCH_DURABILITY = b.comment("Number of successful links a wrench can make before breaking. 0 = unlimited.")
+                .defineInRange("wrench_durability", 0, 0, 1_000_000);
+        ALLOW_LINK_MERGING = b.comment("If true, a link may join two existing multi-generator networks into one.",
+                        "If false, such links are refused; a single generator can still be linked into a network.")
+                .define("allow_network_merging", true);
+        SHOW_LINK_PARTICLES = b.comment("Show green fungal particles along a new link and highlight the selected generator.")
+                .define("show_link_particles", true);
+        b.pop();
+
         b.pop();
 
         b.comment("Mushroom fuels. Each entry is a string: \"<item id or #tag>;burn=<ticks>;energy=<x>;water=<x>;mycelium=<x>;scaling=<x>\"",

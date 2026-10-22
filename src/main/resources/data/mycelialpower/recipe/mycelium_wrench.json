@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "M": {
+      "item": "minecraft:mycelium"
+    },
+    "R": {
+      "item": "minecraft:red_mushroom"
+    }
+  },
+  "pattern": [
+    " IA",
+    " MI",
+    "R  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "mycelialpower:mycelium_wrench"
+  }
+}

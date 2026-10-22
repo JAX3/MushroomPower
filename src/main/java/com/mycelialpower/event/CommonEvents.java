@@ -55,6 +55,6 @@ public final class CommonEvents {
 
     /** Applies pending network changes once per tick even when no generator queried them. */
     public static void onServerTickPost(ServerTickEvent.Post event) {
-        GeneratorNetworkManager.forEach(GeneratorNetworkManager::update);
+        GeneratorNetworkManager.tick();
     }
 }

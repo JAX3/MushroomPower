@@ -3,6 +3,7 @@ package com.mycelialpower.compat.jei;
 import com.mycelialpower.MycelialPower;
 import com.mycelialpower.client.screen.MycelialGeneratorScreen;
 import com.mycelialpower.config.ServerConfig;
+import com.mycelialpower.network.ManualLinking;
 import com.mycelialpower.registry.ModItems;
 import com.mycelialpower.util.NumberFormatting;
 import mezz.jei.api.IModPlugin;
@@ -58,6 +59,31 @@ public class MycelialPowerJeiPlugin implements IModPlugin {
                         NumberFormatting.ticksToTime(ServerConfig.get(ServerConfig.WATER_INTERVAL)),
                         NumberFormatting.grouped(ServerConfig.get(ServerConfig.TANK_CAPACITY))),
                 myceliumInfo());
+        registerWrenchInfo(registration);
+    }
+
+    /** Wrench info page: how to link/unlink, how links affect scaling, and the server's limits. */
+    private static void registerWrenchInfo(IRecipeRegistration registration) {
+        ItemStack wrench = new ItemStack(ModItems.MYCELIUM_WRENCH.get());
+        if (!ServerConfig.get(ServerConfig.WRENCH_ENABLED)) {
+            registration.addIngredientInfo(wrench, VanillaTypes.ITEM_STACK, Component.translatable("jei.mycelialpower.info.wrench_disabled"));
+            return;
+        }
+        int durability = ServerConfig.get(ServerConfig.WRENCH_DURABILITY);
+        boolean crossDimension = ManualLinking.crossDimensionAllowed();
+        registration.addIngredientInfo(wrench, VanillaTypes.ITEM_STACK,
+                Component.translatable("jei.mycelialpower.info.wrench_usage"),
+                Component.translatable("jei.mycelialpower.info.wrench_scaling",
+                        NumberFormatting.decimal(ServerConfig.get(ServerConfig.SCALING_MULTIPLIER))),
+                Component.translatable("jei.mycelialpower.info.wrench_limits",
+                        ServerConfig.get(ServerConfig.MAX_LINK_DISTANCE),
+                        ServerConfig.get(ServerConfig.MAX_MANUAL_CONNECTIONS),
+                        Component.translatable(crossDimension ? "jei.mycelialpower.info.wrench_cross_yes" : "jei.mycelialpower.info.wrench_cross_no"),
+                        durability > 0 ? Component.translatable("jei.mycelialpower.info.wrench_uses", durability)
+                                : Component.translatable("jei.mycelialpower.info.wrench_unlimited"),
+                        Component.translatable(ServerConfig.get(ServerConfig.ALLOW_LINK_MERGING)
+                                ? "jei.mycelialpower.info.wrench_merge_yes" : "jei.mycelialpower.info.wrench_merge_no")),
+                Component.translatable("jei.mycelialpower.info.wrench_resources"));
     }
 
     private static Component myceliumInfo() {
