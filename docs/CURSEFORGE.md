@@ -107,7 +107,7 @@ Mine it with any pickaxe.
 **Mycelium Wrench**
 ```
  (empty)       Iron Ingot      Amethyst Shard
- (empty)       Mycelium        Iron Ingot
+ (empty)       Redstone Dust   Iron Ingot
  Red Mushroom  (empty)         (empty)
 ```
 

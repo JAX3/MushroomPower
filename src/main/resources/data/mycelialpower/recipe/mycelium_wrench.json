@@ -8,16 +8,16 @@
     "I": {
       "item": "minecraft:iron_ingot"
     },
-    "M": {
-      "item": "minecraft:mycelium"
-    },
     "R": {
       "item": "minecraft:red_mushroom"
+    },
+    "X": {
+      "item": "minecraft:redstone"
     }
   },
   "pattern": [
     " IA",
-    " MI",
+    " XI",
     "R  "
   ],
   "result": {

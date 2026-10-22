@@ -59,7 +59,7 @@ Generators connect automatically in all six directions. By default only **runnin
 
 ```
  . I A      I = Iron Ingot     A = Amethyst Shard
- . M I      M = Mycelium       R = Red Mushroom
+ . X I      X = Redstone Dust  R = Red Mushroom
  R . .
 ```
 
