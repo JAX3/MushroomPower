@@ -22,7 +22,7 @@ A NeoForge mod for **Minecraft 1.21.1** (Java 21) that adds one machine: the **M
 ## Installation (players and servers)
 
 1. Install NeoForge 21.1.x for Minecraft 1.21.1.
-2. Put `mycelialpower-1.0.0.jar` in the `mods/` folder of the client **and** the server.
+2. Put `mycelialpower-1.1.0.jar` in the `mods/` folder of the client **and** the server.
 3. Optional: install JEI for 1.21.1. The mod runs normally without it.
 
 ## Usage
@@ -102,7 +102,7 @@ Adding a modded fuel takes one line:
 Requires JDK 21. Gradle 8.14.3 is downloaded by the wrapper.
 
 ```bash
-./gradlew build                # compiles, runs unit tests, outputs build/libs/mycelialpower-1.0.0.jar
+./gradlew build                # compiles, runs unit tests, outputs build/libs/mycelialpower-1.1.0.jar
 ./gradlew runClient            # dev client (with JEI)
 ./gradlew runServer            # dev dedicated server
 ./gradlew runGameTestServer    # runs the in-game GameTests headlessly, then exits
