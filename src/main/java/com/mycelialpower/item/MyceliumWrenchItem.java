@@ -17,6 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -38,6 +39,9 @@ import java.util.List;
  * for the tooltip and the selection highlight.
  */
 public class MyceliumWrenchItem extends Item {
+    /** How long the wrench glints after a successful link (2 seconds). */
+    private static final int LINK_GLOW_TICKS = 40;
+
     public MyceliumWrenchItem(Properties properties) {
         super(properties);
     }
@@ -88,6 +92,7 @@ public class MyceliumWrenchItem extends Item {
         LinkRules.Result result = ManualLinking.tryLink(serverLevel.getServer(), selected, clicked);
         if (result.success()) {
             stack.remove(ModDataComponents.SELECTED_GENERATOR.get());
+            stack.set(ModDataComponents.LINK_GLOW_UNTIL.get(), level.getGameTime() + LINK_GLOW_TICKS);
             ok(player, Component.translatable(result.translationKey(), formatPos(selected), formatPos(clicked)));
             consumeUse(stack, player, context.getHand());
         } else {
@@ -150,9 +155,25 @@ public class MyceliumWrenchItem extends Item {
 
     // ------------------------------------------------------------------ appearance
 
+    /**
+     * The enchantment glint shows while a generator is selected (linking in progress) and for a moment after
+     * a successful link.
+     */
     @Override
     public boolean isFoil(ItemStack stack) {
-        return stack.has(ModDataComponents.SELECTED_GENERATOR.get());
+        return stack.has(ModDataComponents.SELECTED_GENERATOR.get()) || stack.has(ModDataComponents.LINK_GLOW_UNTIL.get());
+    }
+
+    /** Ends the post-link glint once its time is up (server side; the change syncs to the client). */
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+        if (level.isClientSide) {
+            return;
+        }
+        Long glowUntil = stack.get(ModDataComponents.LINK_GLOW_UNTIL.get());
+        if (glowUntil != null && level.getGameTime() >= glowUntil) {
+            stack.remove(ModDataComponents.LINK_GLOW_UNTIL.get());
+        }
     }
 
     @Override

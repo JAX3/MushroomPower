@@ -27,6 +27,15 @@ public final class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.VAR_INT)
                     .build());
 
+    /**
+     * Game time until which a Mycelium Wrench shows the enchantment glint after a successful link.
+     * Not saved to disk (a short visual effect), but synced so the client renders the glint.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> LINK_GLOW_UNTIL =
+            COMPONENTS.register("link_glow_until", () -> DataComponentType.<Long>builder()
+                    .networkSynchronized(ByteBufCodecs.VAR_LONG)
+                    .build());
+
     private ModDataComponents() {
     }
 }

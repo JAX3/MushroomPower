@@ -64,7 +64,7 @@ Generators connect automatically in all six directions. By default only **runnin
 ```
 
 * **Right-click** a generator to select it. It gets a purple outline while you hold the wrench, and the wrench glints.
-* **Right-click another generator** to link them. Green fungal particles run between the two, and the action bar confirms the link.
+* **Right-click another generator** to link them. Green fungal particles run between the two, the action bar confirms the link, and the wrench flashes with the enchantment glint for 2 seconds.
 * **Shift + right-click** a generator to remove all of its manual links. Shift + right-click the air to clear the selection.
 * Linked generators form **one network**, exactly like touching ones, and every running member counts towards the exponential boost. Touching and linked generators can be mixed freely. Each generator keeps its own mushrooms, water and energy (unless the server enables resource sharing).
 * By default, links reach **64 blocks**, each generator can have **8** links, links stay in one dimension, and wrenches never wear out. All of this is configurable in `[network.wrench]`.
