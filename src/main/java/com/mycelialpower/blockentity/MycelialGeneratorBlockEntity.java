@@ -98,6 +98,7 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
     private double chance = -1.0D;
     private int attemptTimer;
     private int convertedThisSession;
+    private int hugeMushroomsThisSession;
 
     // Network
     private long networkId;
@@ -478,7 +479,9 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
                     ServerConfig.get(ServerConfig.NETWORK_EXTRA_CONVERSIONS),
                     ServerConfig.get(ServerConfig.GENERATORS_PER_EXTRA),
                     ServerConfig.get(ServerConfig.MAX_EXTRA_CONVERSIONS));
-            int converted = MyceliumSpreadManager.convert(level, worldPosition, targets, conversions, level.random);
+            MyceliumSpreadManager.ConversionResult outcome = MyceliumSpreadManager.convert(level, worldPosition, targets, conversions, level.random);
+            int converted = outcome.converted();
+            hugeMushroomsThisSession += outcome.hugeMushrooms();
             if (converted > 0) {
                 convertedThisSession += converted;
                 if (ServerConfig.get(ServerConfig.RESET_ON_SUCCESS)) {
@@ -566,7 +569,8 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
                 ServerConfig.get(ServerConfig.MYCELIUM_ENABLED), shownChance, increase, attemptTimer,
                 ServerConfig.get(ServerConfig.ATTEMPT_INTERVAL), convertedThisSession, ServerConfig.get(ServerConfig.TRACK_CONVERSIONS),
                 state.ordinal(),
-                manualLinkCount(), activeLinks, ServerConfig.get(ServerConfig.MAX_MANUAL_CONNECTIONS), connection.ordinal());
+                manualLinkCount(), activeLinks, ServerConfig.get(ServerConfig.MAX_MANUAL_CONNECTIONS), connection.ordinal(),
+                hugeMushroomsThisSession);
     }
 
     private int manualLinkCount() {

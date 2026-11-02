@@ -155,6 +155,23 @@ public final class GeneratorGameTests {
         helper.succeedWhen(() -> helper.assertBlockPresent(Blocks.MYCELIUM, dirt));
     }
 
+    /** A converted block far enough from the generator sprouts a huge mushroom when the chance is 100%. */
+    @GameTest(template = "tall_empty", timeoutTicks = 400)
+    public static void convertedBlockSproutsHugeMushroom(GameTestHelper helper) {
+        double previousChance = ServerConfig.HUGE_MUSHROOM_CHANCE.get();
+        ServerConfig.HUGE_MUSHROOM_CHANCE.set(1.0D);
+        BlockPos dirt = new BlockPos(5, 1, 5);
+        BlockPos stem = dirt.above();
+        helper.setBlock(dirt, Blocks.DIRT);
+        MycelialGeneratorBlockEntity generator = place(helper, new BlockPos(1, 1, 1), new ItemStack(Items.RED_MUSHROOM, 4), 4000);
+        generator.setOwnChance(1.0D);
+        helper.succeedWhen(() -> {
+            helper.assertBlockPresent(Blocks.MYCELIUM, dirt);
+            helper.assertBlockPresent(Blocks.MUSHROOM_STEM, stem);
+            ServerConfig.HUGE_MUSHROOM_CHANCE.set(previousChance);
+        });
+    }
+
     /** Verification 14: machine state survives a save/load round trip. */
     @GameTest(template = TEMPLATE, timeoutTicks = 100)
     public static void stateSurvivesSaveAndLoad(GameTestHelper helper) {

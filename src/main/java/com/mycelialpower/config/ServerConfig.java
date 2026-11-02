@@ -84,6 +84,10 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue GENERATORS_PER_EXTRA;
     public static final ModConfigSpec.IntValue MAX_EXTRA_CONVERSIONS;
     public static final ModConfigSpec.BooleanValue TRACK_CONVERSIONS;
+    public static final ModConfigSpec.BooleanValue HUGE_MUSHROOM_ENABLED;
+    public static final ModConfigSpec.DoubleValue HUGE_MUSHROOM_CHANCE;
+    public static final ModConfigSpec.DoubleValue HUGE_MUSHROOM_RED_RATIO;
+    public static final ModConfigSpec.IntValue HUGE_MUSHROOM_MIN_DISTANCE;
 
     // [performance]
     public static final ModConfigSpec.IntValue GUI_SYNC_INTERVAL;
@@ -257,6 +261,16 @@ public final class ServerConfig {
                 .defineInRange("maxExtraConversions", 4, 0, 64);
         TRACK_CONVERSIONS = b.comment("If true, the GUI shows how many blocks each generator converted since it was loaded.")
                 .define("trackConversions", true);
+        HUGE_MUSHROOM_ENABLED = b.comment("If true, a block that was just converted into mycelium may sprout a huge mushroom.")
+                .define("hugeMushroomEnabled", true);
+        HUGE_MUSHROOM_CHANCE = b.comment("Chance that each converted block sprouts a huge mushroom (0.05 = 5%).",
+                        "The mushroom only grows if it has room and every chunk it would touch is loaded.")
+                .defineInRange("hugeMushroomChance", 0.05D, 0.0D, 1.0D);
+        HUGE_MUSHROOM_RED_RATIO = b.comment("Share of huge mushrooms that are red (the rest are brown). 0.5 = half and half.")
+                .defineInRange("hugeMushroomRedRatio", 0.5D, 0.0D, 1.0D);
+        HUGE_MUSHROOM_MIN_DISTANCE = b.comment("Minimum horizontal distance (in blocks) between the generator and a huge mushroom's stem,",
+                        "so caps do not wall in the machine. Converted blocks closer than this never sprout one.")
+                .defineInRange("hugeMushroomMinDistance", 3, 0, 8);
         b.pop();
 
         b.comment("Performance tuning.").push("performance");

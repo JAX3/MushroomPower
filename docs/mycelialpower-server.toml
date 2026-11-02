@@ -205,6 +205,22 @@
 	maxExtraConversions = 4
 	#If true, the GUI shows how many blocks each generator converted since it was loaded.
 	trackConversions = true
+	#If true, a block that was just converted into mycelium may sprout a huge mushroom.
+	hugeMushroomEnabled = true
+	#Chance that each converted block sprouts a huge mushroom (0.05 = 5%).
+	#The mushroom only grows if it has room and every chunk it would touch is loaded.
+	# Default: 0.05
+	# Range: 0.0 ~ 1.0
+	hugeMushroomChance = 0.05
+	#Share of huge mushrooms that are red (the rest are brown). 0.5 = half and half.
+	# Default: 0.5
+	# Range: 0.0 ~ 1.0
+	hugeMushroomRedRatio = 0.5
+	#Minimum horizontal distance (in blocks) between the generator and a huge mushroom's stem,
+	#so caps do not wall in the machine. Converted blocks closer than this never sprout one.
+	# Default: 3
+	# Range: 0 ~ 8
+	hugeMushroomMinDistance = 3
 
 #Performance tuning.
 [performance]

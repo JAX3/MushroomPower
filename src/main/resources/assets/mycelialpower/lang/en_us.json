@@ -208,5 +208,12 @@
   "mycelialpower.configuration.wrench_durability": "Wrench durability",
   "mycelialpower.configuration.allow_network_merging": "Allow network merging",
   "mycelialpower.configuration.show_link_particles": "Show link particles",
-  "mycelialpower.configuration.wrench": "Wrench"
+  "mycelialpower.configuration.wrench": "Wrench",
+  "gui.mycelialpower.mycelium.converted_huge": "Converted: %s, huge mushrooms: %s",
+  "gui.mycelialpower.tooltip.mycelium.huge": "Converted blocks sometimes sprout a huge mushroom.",
+  "jei.mycelialpower.info.huge_mushroom": "Huge mushrooms: each block converted at least %s blocks from the generator has a %s chance to sprout a huge red or brown mushroom, if there is room.",
+  "mycelialpower.configuration.hugeMushroomEnabled": "Huge mushroom enabled",
+  "mycelialpower.configuration.hugeMushroomChance": "Huge mushroom chance",
+  "mycelialpower.configuration.hugeMushroomRedRatio": "Huge mushroom red ratio",
+  "mycelialpower.configuration.hugeMushroomMinDistance": "Huge mushroom min distance"
 }

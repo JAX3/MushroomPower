@@ -163,7 +163,13 @@ With the defaults, attempt *k* has chance `1% + (k − 1) × 0.5%`: 1 → 1.0%, 
 | `networkExtraConversions` | `false` | | Extra conversions per success for large networks. |
 | `generatorsPerExtraConversion` | `4` | 1–1024 | One extra per this many active members. |
 | `maxExtraConversions` | `4` | 0–64 | Cap on extra conversions. |
-| `trackConversions` | `true` | | Show "converted this session" in the GUI. |
+| `trackConversions` | `true` | | Show "converted this session" (and huge mushrooms grown) in the GUI. |
+| `hugeMushroomEnabled` | `true` | | Converted blocks may sprout a huge mushroom. |
+| `hugeMushroomChance` | `0.05` | 0–1 | Chance per converted block (0.05 = 5%). |
+| `hugeMushroomRedRatio` | `0.5` | 0–1 | Share of huge mushrooms that are red; the rest are brown. |
+| `hugeMushroomMinDistance` | `3` | 0–8 | Minimum horizontal distance from the generator to the stem, so caps don't wall in the machine. |
+
+**Huge mushrooms** use Minecraft's own huge-mushroom generation, so they look exactly like bone-mealed ones. One only grows when there is room (it never replaces blocks), when every chunk it could touch is already loaded, and when protection allows it: spawn protection, the block place event, and NeoForge's `BlockGrowFeatureEvent`, which other mods can cancel or replace.
 
 The chance and the attempt timer are saved with each generator.
 

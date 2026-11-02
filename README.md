@@ -73,12 +73,14 @@ Generators connect automatically in all six directions. By default only **runnin
 
 ### Mycelium
 
+Converted blocks at least 3 blocks from the generator have a 5% chance to sprout a **huge red or brown mushroom**, if there's room. It only grows into empty space and never loads chunks.
+
 Every 100 running ticks a generator tries to convert a dirt block with air above it, within 4 blocks, into mycelium. The first attempt has a 1% chance. Each failed attempt adds 0.5 percentage points, so attempt 100 has 50.5% and attempt 199 is guaranteed. After a success the chance resets. Attempts with no valid dirt nearby do not change the chance. Conversions fire a block place event so claim and protection mods can block them, and they respect spawn protection and the world border.
 
 ### GUI
 
 * Bars: **energy** (left) and **water tank** (right). The orange box is the remaining burn time of the current mushroom.
-* The info panel shows fuel and time left, water and consumption rate, stored, generated and extracted FE, network size, active count, multiplier, total FE/t and status, and the mycelium chance, increase, next-attempt progress and conversions this session.
+* The info panel shows fuel and time left, water and consumption rate, stored, generated and extracted FE, network size, active count, multiplier, total FE/t and status, and the mycelium chance, increase, next-attempt progress, conversions and huge mushrooms grown this session.
 * Hover over any bar or line for exact numbers and explanations. The lamp shows the machine state.
 * All values are computed on the server and sent to the viewing player.
 

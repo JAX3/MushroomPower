@@ -50,6 +50,7 @@ While it runs, a generator tries every few seconds to turn a nearby dirt block i
 - The first attempt has a **1%** chance.
 - Every miss adds **+0.5%**, so the longer it goes without spreading, the more likely it gets.
 - At 100% the next attempt is **guaranteed**. After a success, the chance resets.
+- Each converted block has a small chance to sprout a **huge red or brown mushroom**, turning the land around your power plant into a mushroom grove.
 - Respects **claim and protection mods**, spawn protection and the world border.
 
 ### 🔥 Fuels

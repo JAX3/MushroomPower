@@ -62,10 +62,14 @@ def generate_models(out):
 
 
 def generate_structure(out):
-    path = os.path.join(out, "data", MOD_ID, "structure", "empty.nbt")
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    structure.write_empty_structure(path)
-    return [path]
+    written = []
+    # name -> size (x, y, z). "tall_empty" leaves room for a huge mushroom (13 tall, cap radius 3).
+    for name, size in (("empty", (8, 5, 8)), ("tall_empty", (12, 18, 12))):
+        path = os.path.join(out, "data", MOD_ID, "structure", name + ".nbt")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        structure.write_empty_structure(path, size)
+        written.append(path)
+    return written
 
 
 def write_preview(out):

@@ -58,7 +58,8 @@ public class MycelialPowerJeiPlugin implements IModPlugin {
                         ServerConfig.get(ServerConfig.WATER_PER_INTERVAL),
                         NumberFormatting.ticksToTime(ServerConfig.get(ServerConfig.WATER_INTERVAL)),
                         NumberFormatting.grouped(ServerConfig.get(ServerConfig.TANK_CAPACITY))),
-                myceliumInfo());
+                myceliumInfo(),
+                hugeMushroomInfo());
         registerWrenchInfo(registration);
     }
 
@@ -84,6 +85,15 @@ public class MycelialPowerJeiPlugin implements IModPlugin {
                         Component.translatable(ServerConfig.get(ServerConfig.ALLOW_LINK_MERGING)
                                 ? "jei.mycelialpower.info.wrench_merge_yes" : "jei.mycelialpower.info.wrench_merge_no")),
                 Component.translatable("jei.mycelialpower.info.wrench_resources"));
+    }
+
+    private static Component hugeMushroomInfo() {
+        if (!ServerConfig.get(ServerConfig.MYCELIUM_ENABLED) || !ServerConfig.get(ServerConfig.HUGE_MUSHROOM_ENABLED)) {
+            return Component.empty();
+        }
+        return Component.translatable("jei.mycelialpower.info.huge_mushroom",
+                ServerConfig.get(ServerConfig.HUGE_MUSHROOM_MIN_DISTANCE),
+                NumberFormatting.percent(ServerConfig.get(ServerConfig.HUGE_MUSHROOM_CHANCE)));
     }
 
     private static Component myceliumInfo() {

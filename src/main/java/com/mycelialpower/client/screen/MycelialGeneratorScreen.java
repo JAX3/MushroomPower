@@ -245,14 +245,15 @@ public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGen
                         .withStyle(ChatFormatting.GRAY),
                 Component.translatable("gui.mycelialpower.tooltip.mycelium.next",
                         NumberFormatting.ticksToTime(Math.max(0, s.attemptInterval() - s.attemptProgress()))).withStyle(ChatFormatting.GRAY),
-                Component.translatable("gui.mycelialpower.tooltip.mycelium.rule").withStyle(ChatFormatting.DARK_GRAY));
+                Component.translatable("gui.mycelialpower.tooltip.mycelium.rule").withStyle(ChatFormatting.DARK_GRAY),
+                Component.translatable("gui.mycelialpower.tooltip.mycelium.huge").withStyle(ChatFormatting.DARK_GRAY));
         if (s.myceliumEnabled()) {
             row(graphics, 7, "gui.mycelialpower.section.mycelium", Component.translatable("gui.mycelialpower.mycelium.line",
                     NumberFormatting.percent(s.chance()), NumberFormatting.percent(s.chanceIncrease())), myceliumTooltip);
             row(graphics, 8, null, Component.translatable("gui.mycelialpower.mycelium.next"), myceliumTooltip);
             if (s.trackConversions()) {
-                row(graphics, 9, null, Component.translatable("gui.mycelialpower.mycelium.converted", NumberFormatting.grouped(s.converted())),
-                        myceliumTooltip);
+                row(graphics, 9, null, Component.translatable("gui.mycelialpower.mycelium.converted_huge",
+                        NumberFormatting.grouped(s.converted()), NumberFormatting.grouped(s.hugeMushrooms())), myceliumTooltip);
             }
         } else {
             row(graphics, 7, "gui.mycelialpower.section.mycelium", Component.translatable("gui.mycelialpower.mycelium.disabled"),

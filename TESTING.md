@@ -26,6 +26,7 @@ This starts a headless server, runs every `@GameTest` in `GeneratorGameTests`, t
 | `networkSplitsWhenGeneratorRemoved` | Breaking the middle of a line splits the network |
 | `generatorWithoutWaterStops` | No water: state NO_WATER, no FE, the mushroom is kept |
 | `myceliumConvertsDirt` | A 100% chance converts dirt with air above into mycelium |
+| `convertedBlockSproutsHugeMushroom` | With a 100% chance, dirt 4 blocks away turns into mycelium and grows a huge mushroom (uses the taller `tall_empty` structure) |
 | `stateSurvivesSaveAndLoad` | Energy, burn progress, water, chance and inventory survive a save/load |
 | `hugeMultiplierDoesNotOverflow` | Extreme values stay within int range |
 | `manualLinkJoinsDistantGenerators` | Two generators 5 blocks apart, linked by wrench: one network, 48 FE/t each, connection MANUAL |
@@ -44,6 +45,13 @@ Run `./gradlew runClient` and create a **creative, superflat** world with cheats
 2. Connect a Mekanism cable or machine. Energy flows out, and the GUI's *out* value rises to match.
 3. Place 3 touching generators, all fed. Each GUI shows **3 linked, 3 active**, **x1.44** and a total of about **173 FE/t** (on brown mushrooms; red ones run 1.25× higher).
 4. Hover the orange burn box. You should see one clean tooltip. With JEI installed, clicking it opens the fuel list.
+
+### Huge mushrooms
+1. Set `hugeMushroomChance = 1.0` in the server config (it applies while the world runs).
+2. Clear a 9×9 area around a running generator, leaving dirt with air above at least 3 blocks away from it.
+3. Each conversion now grows a huge red or brown mushroom, with spore particles. The GUI's last line counts them.
+4. Dirt within 2 blocks of the generator turns into mycelium but never sprouts one.
+5. Put a stone ceiling 3 blocks above some dirt. Those blocks convert, but no mushroom grows (no room).
 
 ### Mycelium Wrench
 | # | Action | Expected |
