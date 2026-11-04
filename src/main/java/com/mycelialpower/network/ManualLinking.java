@@ -6,7 +6,6 @@ import com.mycelialpower.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -23,7 +22,9 @@ import java.util.Set;
  * ordinary "use item on block" interaction.
  */
 public final class ManualLinking {
-    private static final DustParticleOptions FUNGAL_GREEN = new DustParticleOptions(new Vector3f(0.45F, 1.0F, 0.55F), 1.0F);
+    // Red and white, like the red mushroom in the generator's window.
+    private static final DustParticleOptions LINK_RED = new DustParticleOptions(new Vector3f(1.0F, 0.2F, 0.22F), 1.0F);
+    private static final DustParticleOptions LINK_WHITE = new DustParticleOptions(new Vector3f(1.0F, 0.97F, 0.95F), 0.8F);
     private static final int MAX_PARTICLE_POINTS = 96;
 
     private ManualLinking() {
@@ -151,7 +152,7 @@ public final class ManualLinking {
         }
     }
 
-    /** Green fungal particles along the new link, plus a chime. Visual only; sent to nearby players. */
+    /** Red and white particles along the new link, plus a chime. Visual only; sent to nearby players. */
     private static void showLinkEffect(ServerLevel level, BlockPos from, BlockPos to) {
         level.playSound(null, to, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 0.8F);
         if (!ServerConfig.get(ServerConfig.SHOW_LINK_PARTICLES)) {
@@ -165,14 +166,13 @@ public final class ManualLinking {
             double t = i / (double) points;
             double wave = Math.sin(t * Math.PI) * Math.min(1.5D, length * 0.08D);
             Vec3 p = a.lerp(b, t).add(0, wave, 0);
-            level.sendParticles(FUNGAL_GREEN, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
-            if (i % 3 == 0) {
-                level.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.x, p.y, p.z, 1, 0.1, 0.1, 0.1, 0.0);
-            }
+            // Mostly red with white "spots", like the mushroom cap.
+            level.sendParticles(i % 3 == 0 ? LINK_WHITE : LINK_RED, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
         }
         for (BlockPos end : new BlockPos[]{from, to}) {
             Vec3 c = Vec3.atCenterOf(end);
-            level.sendParticles(ParticleTypes.SPORE_BLOSSOM_AIR, c.x, c.y + 0.6, c.z, 12, 0.4, 0.3, 0.4, 0.0);
+            level.sendParticles(LINK_RED, c.x, c.y + 0.6, c.z, 8, 0.4, 0.3, 0.4, 0.0);
+            level.sendParticles(LINK_WHITE, c.x, c.y + 0.6, c.z, 4, 0.4, 0.3, 0.4, 0.0);
         }
     }
 }

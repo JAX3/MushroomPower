@@ -57,7 +57,7 @@ Run `./gradlew runClient` and create a **creative, superflat** world with cheats
 | # | Action | Expected |
 |---|---|---|
 | W1 | Right-click generator A with the wrench | Action bar: *Selected generator at …*. A has a purple outline while you hold the wrench, and the wrench glints. Its tooltip shows the selected position. |
-| W2 | Right-click generator B, **20 blocks** away | Action bar: *Linked …*. Green particles run from A to B, with a chime. Both GUIs show *Manual, 1/8 links* and **2 linked**. The selection is cleared, and the wrench keeps glinting for about 2 seconds, then stops. |
+| W2 | Right-click generator B, **20 blocks** away | Action bar: *Linked …*. Red and white particles run from A to B, with a chime. Both GUIs show *Manual, 1/8 links* and **2 linked**. The selection is cleared, and the wrench keeps glinting for about 2 seconds, then stops. |
 | W3 | Feed both A and B | Each produces **48 FE/t** (40 × 1.2): they scale as one network. |
 | W4 | Link A to B again | *These generators are already linked*. |
 | W5 | Select A, then right-click A again | *That generator is already selected…* |

@@ -75,7 +75,7 @@ Settings for the **Mycelium Wrench**, which links generators that are not touchi
 | `require_same_dimension` | `true` | | Keep links within one dimension. **Overrides** `allow_cross_dimension_links`. |
 | `wrench_durability` | `0` | 0–1,000,000 | Successful links per wrench before it breaks. `0` = unlimited. Creative-mode players never use it up. |
 | `allow_network_merging` | `true` | | If `false`, a link that would join two different multi-generator networks is refused. A lone generator can still be linked into a network. |
-| `show_link_particles` | `true` | | Green fungal particles along new links, and a purple outline on the selected generator. |
+| `show_link_particles` | `true` | | Red and white particles along new links, and a purple outline on the selected generator. |
 
 Where links are stored: in the world's `data/mycelialpower_generator_links.dat`, not in the generators. That's why breaking a generator removes its links from both ends without loading the other generator's chunk. A link to a generator in an unloaded chunk is kept, and counts again once both chunks are loaded.
 

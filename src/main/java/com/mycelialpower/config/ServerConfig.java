@@ -176,7 +176,7 @@ public final class ServerConfig {
         ALLOW_LINK_MERGING = b.comment("If true, a link may join two existing multi-generator networks into one.",
                         "If false, such links are refused; a single generator can still be linked into a network.")
                 .define("allow_network_merging", true);
-        SHOW_LINK_PARTICLES = b.comment("Show green fungal particles along a new link and highlight the selected generator.")
+        SHOW_LINK_PARTICLES = b.comment("Show red and white particles along a new link and highlight the selected generator.")
                 .define("show_link_particles", true);
         b.pop();
 

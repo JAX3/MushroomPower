@@ -38,7 +38,7 @@ Generators touching on **any of their six faces** automatically form a network. 
 ### 🔧 Mycelium Wrench: wireless links
 Can't fit your generators side by side? Link them with the **Mycelium Wrench**.
 
-- **Right-click** a generator to select it, then **right-click another** to link them. Green fungal particles show the connection.
+- **Right-click** a generator to select it, then **right-click another** to link them. Red and white particles show the connection.
 - Linked generators form **one network** and share the full exponential boost, just like touching ones.
 - Mix touching and linked generators freely. The GUI shows whether each one is connected physically, manually or both.
 - **Shift + right-click** a generator to remove its links.

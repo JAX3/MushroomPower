@@ -100,7 +100,7 @@
 		#If true, a link may join two existing multi-generator networks into one.
 		#If false, such links are refused; a single generator can still be linked into a network.
 		allow_network_merging = true
-		#Show green fungal particles along a new link and highlight the selected generator.
+		#Show red and white particles along a new link and highlight the selected generator.
 		show_link_particles = true
 
 #Mushroom fuels. Each entry is a string: "<item id or #tag>;burn=<ticks>;energy=<x>;water=<x>;mycelium=<x>;scaling=<x>"
