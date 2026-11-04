@@ -21,7 +21,8 @@ pip install -r requirements.txt
 python generate.py                      # everything -> ./output
 python generate.py --preview            # also enlarged previews in ./output/preview/
 python generate.py --only textures      # just textures (--only can be repeated)
-python generate.py --seed 42            # different random detail (rivets, fungus, mycelium specks)
+python generate.py --style realistic     # the earlier noisy-metal block and wrench art
+python generate.py --seed 42            # different random detail (realistic style, GUI specks)
 python generate.py --clean              # wipe ./output first
 python generate.py -o some/other/dir    # write somewhere else
 python -m mycelial_textures --help      # same tool, run as a module
@@ -50,9 +51,11 @@ Review the output (`--preview` helps), then either copy the files you want into 
 python generate.py -o ../../src/main/resources --only textures
 ```
 
-With the default seed (`1337`), the tool reproduces the generated files that ship with the mod.
+With the default settings (cartoon style, seed `1337`), the tool reproduces the files that ship with the mod byte for byte.
 
-> **Hand-edited textures:** `textures/item/mycelium_wrench.png` in the mod has been replaced by a hand-made version, so it no longer matches `items.py`. Writing the tool's output straight into the mod (`-o ../../src/main/resources` without `--only`) would overwrite it. Write to `output/` and copy only the files you want, or use `--only models` / `--only structure`.
+### Art styles
+
+`--style cartoon` (the default, used by the mod) draws hand-placed pixel art: thick outlines, flat colours, chunky bolts, bright moss and a bold red mushroom window that pulses and sparkles while running. `--style realistic` draws the earlier noisy-metal look. Both styles produce the same GUI, JEI background and logo.
 
 `--clean` refuses to delete anything except the default `output/` folder.
 
@@ -61,9 +64,10 @@ With the default seed (`1337`), the tool reproduces the generated files that shi
 | Module | Contents |
 |---|---|
 | `mycelial_textures/palette.py` | Colour helpers, shared colours, the seeded random source |
-| `mycelial_textures/blocks.py` | 16×16 block textures, and the front chamber's red mushroom (dim when idle, glowing 8-frame pulse when running) |
+| `mycelial_textures/blocks.py` | Cartoon 16×16 block textures as editable character grids, including the front window's red mushroom (dim when idle, pulsing with sparkles when running) |
+| `mycelial_textures/blocks_realistic.py` | The earlier noisy-metal block textures (`--style realistic`) |
 | `mycelial_textures/gui.py` | Machine GUI (256×256), JEI background, logo |
-| `mycelial_textures/items.py` | Hand-placed item icons (Mycelium Wrench), editable as a character grid |
+| `mycelial_textures/items.py` | Hand-placed Mycelium Wrench icons (cartoon and realistic), editable as character grids |
 | `mycelial_textures/models.py` | Block/item models (with mushroom and fungus elements) and the blockstate |
 | `mycelial_textures/structure.py` | Tiny NBT writer for the GameTest structure |
 | `mycelial_textures/__main__.py` | Command line interface |
