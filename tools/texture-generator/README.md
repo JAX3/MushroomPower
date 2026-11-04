@@ -35,6 +35,7 @@ output/
 │   ├── blockstates/mycelial_generator.json
 │   ├── models/block/mycelial_generator.json, mycelial_generator_on.json
 │   ├── models/item/mycelial_generator.json
+│   ├── items/mycelial_generator.json, mycelium_wrench.json   (item model definitions)
 │   ├── models/item/mycelium_wrench.json
 │   └── textures/block/*.png (+ .mcmeta), textures/gui/*.png, textures/item/mycelium_wrench.png
 ├── data/mycelialpower/structure/empty.nbt, tall_empty.nbt   (GameTest structures)

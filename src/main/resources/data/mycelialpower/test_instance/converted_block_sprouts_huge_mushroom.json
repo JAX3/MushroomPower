@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:function",
+  "function": "mycelialpower:converted_block_sprouts_huge_mushroom",
+  "environment": "mycelialpower:default",
+  "structure": "mycelialpower:tall_empty",
+  "max_ticks": 400,
+  "required": true
+}

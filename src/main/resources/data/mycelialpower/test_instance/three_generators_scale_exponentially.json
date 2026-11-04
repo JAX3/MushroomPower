@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:function",
+  "function": "mycelialpower:three_generators_scale_exponentially",
+  "environment": "mycelialpower:default",
+  "structure": "mycelialpower:empty",
+  "max_ticks": 100,
+  "required": true
+}

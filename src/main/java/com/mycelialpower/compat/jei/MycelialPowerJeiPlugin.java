@@ -20,7 +20,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
@@ -32,10 +32,10 @@ import java.util.List;
  */
 @JeiPlugin
 public class MycelialPowerJeiPlugin implements IModPlugin {
-    private static final ResourceLocation UID = MycelialPower.id("jei_plugin");
+    private static final Identifier UID = MycelialPower.id("jei_plugin");
 
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
         return UID;
     }
 
@@ -117,7 +117,7 @@ public class MycelialPowerJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(ModItems.MYCELIAL_GENERATOR.get()), MycelialGeneratorCategory.TYPE);
+        registration.addRecipeCatalysts(MycelialGeneratorCategory.TYPE, ModItems.MYCELIAL_GENERATOR.get());
     }
 
     @Override
@@ -134,14 +134,9 @@ public class MycelialPowerJeiPlugin implements IModPlugin {
                                 MycelialGeneratorScreen.BURN_W, MycelialGeneratorScreen.BURN_H);
                     }
 
-                    // Not annotated: only some JEI 19.x builds declare it. Where present it stops the tooltip outright.
+                    @Override
                     public boolean isTooltipEnabled() {
                         return false;
-                    }
-
-                    @Override
-                    public List<Component> getTooltipStrings() {
-                        return List.of();
                     }
 
                     @Override

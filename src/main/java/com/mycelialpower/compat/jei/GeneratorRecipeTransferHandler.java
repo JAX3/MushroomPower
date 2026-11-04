@@ -4,17 +4,17 @@ import com.mycelialpower.menu.MycelialGeneratorMenu;
 import com.mycelialpower.net.FuelTransferPayload;
 import com.mycelialpower.registry.ModMenus;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,10 +43,12 @@ public class GeneratorRecipeTransferHandler implements IRecipeTransferHandler<My
     }
 
     @Override
-    public RecipeType<MycelialFuelRecipe> getRecipeType() {
+    public IRecipeType<MycelialFuelRecipe> getRecipeType() {
         return MycelialGeneratorCategory.TYPE;
     }
 
+    // JEI 29 still requires this signature (its context-based replacement delegates to it by default).
+    @SuppressWarnings({"deprecation", "removal"})
     @Nullable
     @Override
     public IRecipeTransferError transferRecipe(MycelialGeneratorMenu container, MycelialFuelRecipe recipe, IRecipeSlotsView recipeSlots,
@@ -62,14 +64,14 @@ public class GeneratorRecipeTransferHandler implements IRecipeTransferHandler<My
             return helper.createUserErrorWithTooltip(Component.translatable("jei.mycelialpower.transfer.missing"));
         }
         if (doTransfer) {
-            List<ResourceLocation> ids = new ArrayList<>();
+            List<Identifier> ids = new ArrayList<>();
             for (ItemStack stack : recipe.inputs()) {
                 if (ids.size() >= FuelTransferPayload.MAX_ITEMS) {
                     break;
                 }
                 ids.add(BuiltInRegistries.ITEM.getKey(stack.getItem()));
             }
-            PacketDistributor.sendToServer(new FuelTransferPayload(container.containerId, ids, maxTransfer));
+            ClientPacketDistributor.sendToServer(new FuelTransferPayload(container.containerId, ids, maxTransfer));
         }
         return null;
     }

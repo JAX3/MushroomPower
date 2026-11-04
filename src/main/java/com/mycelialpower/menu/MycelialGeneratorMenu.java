@@ -16,10 +16,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,19 +61,21 @@ public class MycelialGeneratorMenu extends AbstractContainerMenu {
         if (playerInventory.player.level().getBlockEntity(pos) instanceof MycelialGeneratorBlockEntity generator) {
             return new MycelialGeneratorMenu(containerId, playerInventory, generator, generator.getInventory(), ContainerLevelAccess.NULL);
         }
-        return new MycelialGeneratorMenu(containerId, playerInventory, null, new ItemStackHandler(MACHINE_SLOTS), ContainerLevelAccess.NULL);
+        return new MycelialGeneratorMenu(containerId, playerInventory, null, new ItemStacksResourceHandler(MACHINE_SLOTS), ContainerLevelAccess.NULL);
     }
 
     private MycelialGeneratorMenu(int containerId, Inventory playerInventory, @Nullable MycelialGeneratorBlockEntity generator,
-                                  IItemHandler machineInventory, ContainerLevelAccess access) {
+                                  ItemStacksResourceHandler machineInventory, ContainerLevelAccess access) {
         super(ModMenus.MYCELIAL_GENERATOR.get(), containerId);
         this.generator = generator;
         this.access = access;
         this.player = playerInventory.player;
 
-        addSlot(new SlotItemHandler(machineInventory, GeneratorItemHandler.FUEL_SLOT, FUEL_X, FUEL_Y));
-        addSlot(new SlotItemHandler(machineInventory, GeneratorItemHandler.CONTAINER_IN_SLOT, CONTAINER_IN_X, CONTAINER_IN_Y));
-        addSlot(new SlotItemHandler(machineInventory, GeneratorItemHandler.CONTAINER_OUT_SLOT, CONTAINER_OUT_X, CONTAINER_OUT_Y));
+        // The slot modifier (machineInventory::set) writes directly, so the menu can also take from the output slot;
+        // mayPlace still follows the inventory's per-slot validation.
+        addSlot(new ResourceHandlerSlot(machineInventory, machineInventory::set, GeneratorItemHandler.FUEL_SLOT, FUEL_X, FUEL_Y));
+        addSlot(new ResourceHandlerSlot(machineInventory, machineInventory::set, GeneratorItemHandler.CONTAINER_IN_SLOT, CONTAINER_IN_X, CONTAINER_IN_Y));
+        addSlot(new ResourceHandlerSlot(machineInventory, machineInventory::set, GeneratorItemHandler.CONTAINER_OUT_SLOT, CONTAINER_OUT_X, CONTAINER_OUT_Y));
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
@@ -182,7 +182,7 @@ public class MycelialGeneratorMenu extends AbstractContainerMenu {
             if (!moveItemStackTo(stack, GeneratorItemHandler.FUEL_SLOT, GeneratorItemHandler.FUEL_SLOT + 1, false)) {
                 return ItemStack.EMPTY;
             }
-        } else if (stack.getCapability(Capabilities.FluidHandler.ITEM) != null) {
+        } else if (GeneratorItemHandler.isFluidContainer(stack)) {
             if (!moveItemStackTo(stack, GeneratorItemHandler.CONTAINER_IN_SLOT, GeneratorItemHandler.CONTAINER_IN_SLOT + 1, false)) {
                 return ItemStack.EMPTY;
             }

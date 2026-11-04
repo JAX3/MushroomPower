@@ -16,16 +16,17 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Links Mycelial Generators that are not touching.
@@ -54,7 +55,7 @@ public class MyceliumWrenchItem extends Item {
         if (!level.getBlockState(pos).is(ModBlocks.MYCELIAL_GENERATOR.get())) {
             return InteractionResult.PASS;
         }
-        if (level.isClientSide || player == null || !(level instanceof ServerLevel serverLevel)) {
+        if (level.isClientSide() || player == null || !(level instanceof ServerLevel serverLevel)) {
             return InteractionResult.SUCCESS;
         }
         ItemStack stack = context.getItemInHand();
@@ -113,16 +114,16 @@ public class MyceliumWrenchItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (player.isSecondaryUseActive() && stack.has(ModDataComponents.SELECTED_GENERATOR.get())) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 stack.remove(ModDataComponents.SELECTED_GENERATOR.get());
                 ok(player, Component.translatable("message.mycelialpower.selection_cleared"));
             }
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResultHolder.pass(stack);
+        return InteractionResult.PASS;
     }
 
     private static void consumeUse(ItemStack stack, Player player, InteractionHand hand) {
@@ -134,23 +135,23 @@ public class MyceliumWrenchItem extends Item {
         if (LinkRules.remainingUses(durability, used) <= 0) {
             player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 1.0F);
             stack.shrink(1);
-            player.displayClientMessage(Component.translatable("message.mycelialpower.wrench_broke").withStyle(ChatFormatting.RED), true);
+            player.sendOverlayMessage(Component.translatable("message.mycelialpower.wrench_broke").withStyle(ChatFormatting.RED));
         } else {
             stack.set(ModDataComponents.WRENCH_USES.get(), used);
         }
     }
 
     private static void ok(Player player, Component message) {
-        player.displayClientMessage(message.copy().withStyle(ChatFormatting.GREEN), true);
+        player.sendOverlayMessage(message.copy().withStyle(ChatFormatting.GREEN));
     }
 
     private static void fail(Player player, Component message) {
-        player.displayClientMessage(message.copy().withStyle(ChatFormatting.RED), true);
+        player.sendOverlayMessage(message.copy().withStyle(ChatFormatting.RED));
     }
 
     public static Component formatPos(GlobalPos pos) {
         return Component.translatable("message.mycelialpower.position", pos.pos().getX(), pos.pos().getY(), pos.pos().getZ(),
-                pos.dimension().location().toString());
+                pos.dimension().identifier().toString());
     }
 
     // ------------------------------------------------------------------ appearance
@@ -166,10 +167,7 @@ public class MyceliumWrenchItem extends Item {
 
     /** Ends the post-link glint once its time is up (server side; the change syncs to the client). */
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
-        if (level.isClientSide) {
-            return;
-        }
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, EquipmentSlot slot) {
         Long glowUntil = stack.get(ModDataComponents.LINK_GLOW_UNTIL.get());
         if (glowUntil != null && level.getGameTime() >= glowUntil) {
             stack.remove(ModDataComponents.LINK_GLOW_UNTIL.get());
@@ -197,28 +195,29 @@ public class MyceliumWrenchItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.desc").withStyle(ChatFormatting.GRAY));
+    @SuppressWarnings("deprecation") // the TooltipDisplay overload is the current (deprecated-for-components) item hook
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.desc").withStyle(ChatFormatting.GRAY));
         GlobalPos selected = stack.get(ModDataComponents.SELECTED_GENERATOR.get());
         if (selected != null) {
-            tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.selected", formatPos(selected))
+            tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.selected", formatPos(selected))
                     .withStyle(ChatFormatting.LIGHT_PURPLE));
-            tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.status.waiting").withStyle(ChatFormatting.GREEN));
+            tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.status.waiting").withStyle(ChatFormatting.GREEN));
         } else {
-            tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.status.none").withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.status.none").withStyle(ChatFormatting.DARK_GRAY));
         }
         int durability = ServerConfig.get(ServerConfig.WRENCH_DURABILITY);
         if (durability > 0) {
             int remaining = LinkRules.remainingUses(durability, stack.getOrDefault(ModDataComponents.WRENCH_USES.get(), 0));
-            tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.uses", remaining, durability).withStyle(ChatFormatting.GRAY));
+            tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.uses", remaining, durability).withStyle(ChatFormatting.GRAY));
         }
-        tooltip.add(Component.empty());
-        tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.help.select").withStyle(ChatFormatting.WHITE));
-        tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.help.link").withStyle(ChatFormatting.WHITE));
-        tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.help.unlink").withStyle(ChatFormatting.WHITE));
-        tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.help.limits",
+        tooltip.accept(Component.empty());
+        tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.help.select").withStyle(ChatFormatting.WHITE));
+        tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.help.link").withStyle(ChatFormatting.WHITE));
+        tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.help.unlink").withStyle(ChatFormatting.WHITE));
+        tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.help.limits",
                 ServerConfig.get(ServerConfig.MAX_LINK_DISTANCE), ServerConfig.get(ServerConfig.MAX_MANUAL_CONNECTIONS))
                 .withStyle(ChatFormatting.DARK_GRAY));
-        tooltip.add(Component.translatable("item.mycelialpower.mycelium_wrench.flavor").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+        tooltip.accept(Component.translatable("item.mycelialpower.mycelium_wrench.flavor").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
     }
 }

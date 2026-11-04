@@ -4,6 +4,7 @@ import com.mycelialpower.capability.ModCapabilities;
 import com.mycelialpower.config.ClientConfig;
 import com.mycelialpower.config.ServerConfig;
 import com.mycelialpower.event.CommonEvents;
+import com.mycelialpower.gametest.ModGameTests;
 import com.mycelialpower.net.ModNetworking;
 import com.mycelialpower.registry.ModBlockEntities;
 import com.mycelialpower.registry.ModBlocks;
@@ -12,7 +13,7 @@ import com.mycelialpower.registry.ModDataComponents;
 import com.mycelialpower.registry.ModItems;
 import com.mycelialpower.registry.ModMenus;
 import com.mycelialpower.registry.ModSounds;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -34,6 +35,7 @@ public final class MycelialPower {
         ModSounds.SOUNDS.register(modBus);
         ModCreativeTabs.CREATIVE_TABS.register(modBus);
         ModDataComponents.COMPONENTS.register(modBus);
+        ModGameTests.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
@@ -49,7 +51,7 @@ public final class MycelialPower {
         NeoForge.EVENT_BUS.addListener(CommonEvents::onServerTickPost);
     }
 
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 }

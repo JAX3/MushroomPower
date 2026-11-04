@@ -10,11 +10,11 @@ public final class ModCapabilities {
     }
 
     public static void register(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.MYCELIAL_GENERATOR.get(),
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, ModBlockEntities.MYCELIAL_GENERATOR.get(),
                 (generator, side) -> generator.getEnergyStorage());
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.MYCELIAL_GENERATOR.get(),
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, ModBlockEntities.MYCELIAL_GENERATOR.get(),
                 (generator, side) -> generator.getExternalFluidHandler());
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MYCELIAL_GENERATOR.get(),
+        event.registerBlockEntity(Capabilities.Item.BLOCK, ModBlockEntities.MYCELIAL_GENERATOR.get(),
                 (generator, side) -> generator.getAutomationItemHandler());
     }
 }

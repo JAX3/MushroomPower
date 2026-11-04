@@ -1,46 +1,52 @@
 package com.mycelialpower.capability;
 
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
  * The inventory as seen by hoppers and pipes: mushrooms and filled containers may be inserted, only
  * emptied containers may be extracted.
  */
-public record AutomationItemHandler(GeneratorItemHandler inventory) implements IItemHandler {
+public record AutomationItemHandler(GeneratorItemHandler inventory) implements ResourceHandler<ItemResource> {
     @Override
-    public int getSlots() {
-        return inventory.getSlots();
+    public int size() {
+        return inventory.size();
     }
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
-        return inventory.getStackInSlot(slot);
+    public ItemResource getResource(int index) {
+        return inventory.getResource(index);
     }
 
     @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (slot == GeneratorItemHandler.CONTAINER_OUT_SLOT) {
-            return stack;
+    public long getAmountAsLong(int index) {
+        return inventory.getAmountAsLong(index);
+    }
+
+    @Override
+    public long getCapacityAsLong(int index, ItemResource resource) {
+        return inventory.getCapacityAsLong(index, resource);
+    }
+
+    @Override
+    public boolean isValid(int index, ItemResource resource) {
+        return index != GeneratorItemHandler.CONTAINER_OUT_SLOT && inventory.isValid(index, resource);
+    }
+
+    @Override
+    public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+        if (index == GeneratorItemHandler.CONTAINER_OUT_SLOT) {
+            return 0;
         }
-        return inventory.insertItem(slot, stack, simulate);
+        return inventory.insert(index, resource, amount, transaction);
     }
 
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (slot != GeneratorItemHandler.CONTAINER_OUT_SLOT) {
-            return ItemStack.EMPTY;
+    public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
+        if (index != GeneratorItemHandler.CONTAINER_OUT_SLOT) {
+            return 0;
         }
-        return inventory.extractItem(slot, amount, simulate);
-    }
-
-    @Override
-    public int getSlotLimit(int slot) {
-        return inventory.getSlotLimit(slot);
-    }
-
-    @Override
-    public boolean isItemValid(int slot, ItemStack stack) {
-        return slot != GeneratorItemHandler.CONTAINER_OUT_SLOT && inventory.isItemValid(slot, stack);
+        return inventory.extract(index, resource, amount, transaction);
     }
 }

@@ -16,8 +16,10 @@ def box(frm, to, texture, uv=None, emissive=False, cull_all=False):
         faces[name] = face(texture, uv, name if cull_all else None)
     element = {"from": frm, "to": to, "faces": faces}
     if emissive:
+        # Full-bright window: vanilla element light emission (1.21.2+) plus NeoForge's face data.
         element["shade"] = False
-        element["neoforge_data"] = {"block_light": 15, "sky_light": 15, "ambient_occlusion": False}
+        element["light_emission"] = 15
+        element["neoforge_data"] = {"light_emission": 15, "ambient_occlusion": False}
     return element
 
 
@@ -50,7 +52,6 @@ def generator_model(active):
     ]
     model = {
         "parent": "minecraft:block/block",
-        "render_type": "minecraft:cutout",
         "textures": {
             "particle": "mycelialpower:block/generator_side",
             "front": "mycelialpower:block/generator_front",

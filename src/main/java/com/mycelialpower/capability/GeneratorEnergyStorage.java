@@ -1,15 +1,19 @@
 package com.mycelialpower.capability;
 
 import com.mycelialpower.config.ServerConfig;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * The generator's internal energy buffer. Exposed to other blocks as extract-only: it never accepts
- * energy from outside, which makes generator-to-generator energy loops (and duplication) impossible.
- * Capacity and transfer rate are read from the server config so reloads apply immediately.
+ * The generator's internal energy buffer, exposed through NeoForge's transfer API ({@link EnergyHandler}).
+ * Other blocks may only extract (inserting always returns 0), which makes generator-to-generator energy
+ * loops and duplication impossible. External extraction is transactional: a rolled-back transaction
+ * restores the buffer exactly. Capacity and transfer rate are read from the server config.
  */
-public class GeneratorEnergyStorage implements IEnergyStorage {
+public class GeneratorEnergyStorage implements EnergyHandler {
     private final Runnable onChanged;
+    private final Journal journal = new Journal();
     private int energy;
     private long extractedThisTick;
 
@@ -21,27 +25,26 @@ public class GeneratorEnergyStorage implements IEnergyStorage {
         return Math.max(1, ServerConfig.get(ServerConfig.MAX_ENERGY_STORAGE));
     }
 
-    /** Adds generated energy. Returns the amount actually stored. */
-    public int receiveInternal(int amount, boolean simulate) {
+    /** Adds generated energy directly (not part of a transaction). Returns the amount stored. */
+    public int receiveInternal(int amount) {
         if (amount <= 0) {
             return 0;
         }
-        int space = Math.max(0, capacity() - energy);
-        int accepted = Math.min(space, amount);
-        if (!simulate && accepted > 0) {
+        int accepted = Math.min(space(), amount);
+        if (accepted > 0) {
             energy += accepted;
             onChanged.run();
         }
         return accepted;
     }
 
-    /** Removes energy for internal transfers (pushing to neighbours, sharing). */
-    public int extractInternal(int amount, boolean simulate) {
+    /** Removes energy directly after a committed transfer (pushing to a neighbour, sharing). */
+    public int extractInternal(int amount) {
         if (amount <= 0) {
             return 0;
         }
         int extracted = Math.min(energy, amount);
-        if (!simulate && extracted > 0) {
+        if (extracted > 0) {
             energy -= extracted;
             extractedThisTick += extracted;
             onChanged.run();
@@ -72,33 +75,52 @@ public class GeneratorEnergyStorage implements IEnergyStorage {
     }
 
     @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        return 0;
-    }
-
-    @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        int limit = Math.min(maxExtract, ServerConfig.get(ServerConfig.OUTPUT_TRANSFER_RATE));
-        return extractInternal(limit, simulate);
-    }
-
-    @Override
-    public int getEnergyStored() {
+    public long getAmountAsLong() {
         return energy;
     }
 
     @Override
-    public int getMaxEnergyStored() {
+    public long getCapacityAsLong() {
         return capacity();
     }
 
     @Override
-    public boolean canExtract() {
-        return ServerConfig.get(ServerConfig.OUTPUT_TRANSFER_RATE) > 0;
+    public int insert(int amount, TransactionContext transaction) {
+        return 0;
     }
 
     @Override
-    public boolean canReceive() {
-        return false;
+    public int extract(int amount, TransactionContext transaction) {
+        int limit = Math.min(amount, ServerConfig.get(ServerConfig.OUTPUT_TRANSFER_RATE));
+        int extracted = Math.min(energy, Math.max(0, limit));
+        if (extracted > 0) {
+            journal.updateSnapshots(transaction);
+            energy -= extracted;
+        }
+        return extracted;
+    }
+
+    /** Snapshots for transactional extraction; counts committed extraction for the GUI's "out" rate. */
+    private final class Journal extends SnapshotJournal<Integer> {
+        @Override
+        protected Integer createSnapshot() {
+            return energy;
+        }
+
+        @Override
+        protected void revertToSnapshot(Integer snapshot) {
+            energy = snapshot;
+        }
+
+        @Override
+        protected void onRootCommit(Integer originalState) {
+            int extracted = originalState - energy;
+            if (extracted != 0) {
+                if (extracted > 0) {
+                    extractedThisTick += extracted;
+                }
+                onChanged.run();
+            }
+        }
     }
 }

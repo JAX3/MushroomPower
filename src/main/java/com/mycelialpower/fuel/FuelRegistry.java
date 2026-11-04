@@ -5,7 +5,7 @@ import com.mycelialpower.config.ServerConfig;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -84,7 +84,7 @@ public final class FuelRegistry {
 
     /** Re-resolves an item by registry id, for restoring saved fuel state. */
     public static Optional<FuelDefinition> byItemId(String id) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
+        Identifier rl = Identifier.tryParse(id);
         if (rl == null) {
             return Optional.empty();
         }
@@ -93,13 +93,13 @@ public final class FuelRegistry {
 
     private static Set<Item> candidateItems(FuelDefinition definition) {
         Set<Item> items = new LinkedHashSet<>();
-        ResourceLocation rl = ResourceLocation.tryParse(definition.id());
+        Identifier rl = Identifier.tryParse(definition.id());
         if (rl == null) {
             return items;
         }
         if (definition.tag()) {
             TagKey<Item> key = TagKey.create(Registries.ITEM, rl);
-            BuiltInRegistries.ITEM.getTag(key).ifPresent(set -> {
+            BuiltInRegistries.ITEM.get(key).ifPresent(set -> {
                 for (Holder<Item> holder : set) {
                     items.add(holder.value());
                 }
@@ -132,7 +132,7 @@ public final class FuelRegistry {
                 MycelialPower.LOGGER.warn("Ignoring invalid mushroom fuel entry: {}", e.getMessage());
                 continue;
             }
-            ResourceLocation rl = ResourceLocation.tryParse(def.id());
+            Identifier rl = Identifier.tryParse(def.id());
             if (rl == null) {
                 continue;
             }

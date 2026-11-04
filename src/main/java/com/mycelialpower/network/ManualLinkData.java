@@ -1,41 +1,53 @@
 package com.mycelialpower.network;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mycelialpower.MycelialPower;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.saveddata.SavedDataType;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Every manual (Mycelium Wrench) link of the world, stored once in the overworld's saved data
- * ({@code data/mycelialpower_generator_links.dat}).
+ * Every manual (Mycelium Wrench) link of the world, stored once in the server's global saved data
+ * ({@code data/mycelialpower/generator_links.dat}).
  * <p>
  * Keeping links in one world-level store instead of in each block entity means a destroyed generator's links
  * can be removed from both ends without loading the partner's chunk, and links to unloaded generators are
  * preserved untouched. Links are undirected and stored without duplicates.
  */
 public final class ManualLinkData extends SavedData {
-    public static final String NAME = "mycelialpower_generator_links";
-    private static final Factory<ManualLinkData> FACTORY = new Factory<>(ManualLinkData::new, ManualLinkData::load, null);
+    /** One undirected link, as stored on disk. */
+    private record Link(GlobalPos a, GlobalPos b) {
+        static final Codec<Link> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                GlobalPos.CODEC.fieldOf("a").forGetter(Link::a),
+                GlobalPos.CODEC.fieldOf("b").forGetter(Link::b)
+        ).apply(instance, Link::new));
+    }
+
+    public static final Codec<ManualLinkData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Link.CODEC.listOf().optionalFieldOf("links", List.of()).forGetter(ManualLinkData::toLinkList)
+    ).apply(instance, ManualLinkData::fromLinkList));
+
+    public static final SavedDataType<ManualLinkData> TYPE = new SavedDataType<>(
+            MycelialPower.id("generator_links"), ManualLinkData::new, CODEC, null);
 
     private final Map<GlobalPos, Set<GlobalPos>> links = new HashMap<>();
 
+    public ManualLinkData() {
+    }
+
+    /** Global (not per-dimension) storage, because links can span dimensions. */
     public static ManualLinkData get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(FACTORY, NAME);
+        return server.getDataStorage().computeIfAbsent(TYPE);
     }
 
     public Set<GlobalPos> linksOf(GlobalPos pos) {
@@ -105,59 +117,33 @@ public final class ManualLinkData extends SavedData {
         return sum / 2;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
-        ListTag list = new ListTag();
+    /** Each undirected link exactly once. */
+    private List<Link> toLinkList() {
+        List<Link> result = new ArrayList<>();
         for (Map.Entry<GlobalPos, Set<GlobalPos>> entry : links.entrySet()) {
             GlobalPos a = entry.getKey();
             for (GlobalPos b : entry.getValue()) {
-                if (compare(a, b) < 0) { // each undirected link once
-                    CompoundTag link = new CompoundTag();
-                    link.put("A", write(a));
-                    link.put("B", write(b));
-                    list.add(link);
+                if (compare(a, b) < 0) {
+                    result.add(new Link(a, b));
                 }
             }
         }
-        tag.put("Links", list);
-        return tag;
+        return result;
     }
 
-    public static ManualLinkData load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static ManualLinkData fromLinkList(List<Link> list) {
         ManualLinkData data = new ManualLinkData();
-        ListTag list = tag.getList("Links", Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) {
-            CompoundTag link = list.getCompound(i);
-            GlobalPos a = read(link.getCompound("A"));
-            GlobalPos b = read(link.getCompound("B"));
-            if (a != null && b != null && !a.equals(b)) {
-                data.links.computeIfAbsent(a, k -> new HashSet<>()).add(b);
-                data.links.computeIfAbsent(b, k -> new HashSet<>()).add(a);
+        for (Link link : list) {
+            if (!link.a().equals(link.b())) {
+                data.links.computeIfAbsent(link.a(), k -> new HashSet<>()).add(link.b());
+                data.links.computeIfAbsent(link.b(), k -> new HashSet<>()).add(link.a());
             }
         }
         return data;
     }
 
     private static int compare(GlobalPos a, GlobalPos b) {
-        int dim = a.dimension().location().compareTo(b.dimension().location());
+        int dim = a.dimension().identifier().compareTo(b.dimension().identifier());
         return dim != 0 ? dim : Long.compare(a.pos().asLong(), b.pos().asLong());
-    }
-
-    private static CompoundTag write(GlobalPos pos) {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("Dimension", pos.dimension().location().toString());
-        tag.putLong("Pos", pos.pos().asLong());
-        return tag;
-    }
-
-    @Nullable
-    private static GlobalPos read(CompoundTag tag) {
-        ResourceLocation dimension = ResourceLocation.tryParse(tag.getString("Dimension"));
-        if (dimension == null || !tag.contains("Pos")) {
-            MycelialPower.LOGGER.warn("Skipping malformed generator link entry {}", tag);
-            return null;
-        }
-        ResourceKey<net.minecraft.world.level.Level> key = ResourceKey.create(Registries.DIMENSION, dimension);
-        return GlobalPos.of(key, BlockPos.of(tag.getLong("Pos")));
     }
 }

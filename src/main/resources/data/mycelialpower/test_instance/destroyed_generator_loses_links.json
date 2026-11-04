@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:function",
+  "function": "mycelialpower:destroyed_generator_loses_links",
+  "environment": "mycelialpower:default",
+  "structure": "mycelialpower:empty",
+  "max_ticks": 100,
+  "required": true
+}

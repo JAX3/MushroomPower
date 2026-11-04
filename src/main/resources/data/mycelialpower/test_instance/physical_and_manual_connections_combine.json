@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:function",
+  "function": "mycelialpower:physical_and_manual_connections_combine",
+  "environment": "mycelialpower:default",
+  "structure": "mycelialpower:empty",
+  "max_ticks": 100,
+  "required": true
+}

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'idea'
-    id 'net.neoforged.moddev' version '2.0.141'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
 version = mod_version
@@ -17,13 +17,10 @@ repositories {
         content { includeGroup 'mezz.jei' }
     }
     maven {
-        // JEI mirror and Mekanism
+        // JEI mirror
         name = 'ModMaven'
         url = 'https://modmaven.dev/'
-        content {
-            includeGroup 'mezz.jei'
-            includeGroup 'mekanism'
-        }
+        content { includeGroup 'mezz.jei' }
     }
 }
 
@@ -31,15 +28,12 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// Minecraft 26.1.2 ships Java 25, so mods target Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     version = project.neo_version
 
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
 
     runs {
         client {
@@ -77,26 +71,23 @@ neoForge {
     }
 }
 
+// 'localRuntime': present in the dev runs but not published as a dependency (as in the NeoForge MDK).
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
 dependencies {
     // JEI: compile against the API only, so the mod has no hard dependency on JEI.
     compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     if (project.use_jei_runtime.toBoolean()) {
-        // Full JEI in the development runs only. Not bundled into the mod jar.
-        runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+        // Full JEI in the development runs only. Not bundled into the mod jar or published as a dependency.
+        localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
     }
 
-    // Mekanism: compile against the API only (optional integration, not bundled).
-    compileOnly "mekanism:Mekanism:${mekanism_version}:api"
-    if (project.use_mekanism_runtime.toBoolean()) {
-        // Mekanism and its modules in the development runs only, to test FE output into Mekanism cables/machines.
-        runtimeOnly "mekanism:Mekanism:${mekanism_version}"              // core
-        runtimeOnly "mekanism:Mekanism:${mekanism_version}:additions"    // Mekanism: Additions
-        runtimeOnly "mekanism:Mekanism:${mekanism_version}:generators"   // Mekanism: Generators
-        runtimeOnly "mekanism:Mekanism:${mekanism_version}:tools"        // Mekanism: Tools
-    }
-
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    // Gradle 9 needs the JUnit platform launcher declared explicitly; the BOM keeps all JUnit versions aligned.
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

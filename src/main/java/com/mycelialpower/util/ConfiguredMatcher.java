@@ -4,7 +4,7 @@ import com.mycelialpower.MycelialPower;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
 import java.util.ArrayList;
@@ -61,16 +61,16 @@ public final class ConfiguredMatcher<T> {
         for (String raw : source.get()) {
             String entry = raw.trim();
             boolean isTag = entry.startsWith("#");
-            ResourceLocation id = ResourceLocation.tryParse(isTag ? entry.substring(1) : entry);
+            Identifier id = Identifier.tryParse(isTag ? entry.substring(1) : entry);
             if (id == null) {
-                MycelialPower.LOGGER.warn("Ignoring invalid id '{}' in {} config list", raw, registryKey.location());
+                MycelialPower.LOGGER.warn("Ignoring invalid id '{}' in {} config list", raw, registryKey.identifier());
                 continue;
             }
             if (isTag) {
                 tags.add(TagKey.create(registryKey, id));
             } else {
                 registry.getOptional(id).ifPresentOrElse(values::add,
-                        () -> MycelialPower.LOGGER.warn("Ignoring unknown {} '{}' in config", registryKey.location(), id));
+                        () -> MycelialPower.LOGGER.warn("Ignoring unknown {} '{}' in config", registryKey.identifier(), id));
             }
         }
         r = new Resolved<>(Collections.unmodifiableSet(values), List.copyOf(tags));

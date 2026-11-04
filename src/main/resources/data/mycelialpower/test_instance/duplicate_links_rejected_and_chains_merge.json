@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:function",
+  "function": "mycelialpower:duplicate_links_rejected_and_chains_merge",
+  "environment": "mycelialpower:default",
+  "structure": "mycelialpower:empty",
+  "max_ticks": 100,
+  "required": true
+}

@@ -5,7 +5,6 @@ import com.mycelialpower.blockentity.MycelialGeneratorBlockEntity;
 import com.mycelialpower.config.ClientConfig;
 import com.mycelialpower.config.ServerConfig;
 import com.mycelialpower.item.MyceliumWrenchItem;
-import com.mycelialpower.network.ManualLinking;
 import com.mycelialpower.registry.ModBlockEntities;
 import com.mycelialpower.registry.ModSounds;
 import net.minecraft.core.BlockPos;
@@ -17,10 +16,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.Containers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -34,12 +33,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 /**
  * The Mycelial Generator. Visual variants (facing, running/idle, emitted light) are block state
@@ -48,13 +46,13 @@ import org.joml.Vector3f;
 public class MycelialGeneratorBlock extends BaseEntityBlock {
     public static final MapCodec<MycelialGeneratorBlock> CODEC = simpleCodec(MycelialGeneratorBlock::new);
 
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
     /** Light emitted while running; set from the config by the block entity. */
     public static final IntegerProperty LIGHT = IntegerProperty.create("light", 0, 15);
 
     // Matches the glowing red mushroom in the front window (#ff5a5a).
-    private static final DustParticleOptions ENERGY_DUST = new DustParticleOptions(new Vector3f(1.0F, 0.35F, 0.35F), 0.8F);
+    private static final DustParticleOptions ENERGY_DUST = new DustParticleOptions(0xFF5959, 0.8F);
 
     public MycelialGeneratorBlock(Properties properties) {
         super(properties);
@@ -103,7 +101,7 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return null;
         }
         return createTickerHelper(type, ModBlockEntities.MYCELIAL_GENERATOR.get(), MycelialGeneratorBlockEntity::serverTick);
@@ -111,40 +109,34 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof MycelialGeneratorBlockEntity generator) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MycelialGeneratorBlockEntity generator) {
             player.openMenu(generator, buf -> buf.writeBlockPos(pos));
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
-                                              InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+                                          InteractionHand hand, BlockHitResult hitResult) {
         if (stack.getItem() instanceof MyceliumWrenchItem) {
-            // Let the wrench's own useOn handle the click instead of opening the GUI.
-            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+            // PASS skips this block's GUI and lets the wrench's own useOn handle the click.
+            return InteractionResult.PASS;
         }
         if (ServerConfig.get(ServerConfig.ALLOW_BUCKET_INTERACTION)
-                && FluidUtil.getFluidHandler(stack).isPresent()
                 && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hitResult.getDirection())) {
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        // Not a fluid container (or nothing to fill): fall through to useWithoutItem, which opens the GUI.
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
+    /**
+     * Since 1.21.5 removal is split: the block entity drops its inventory and removes its links in
+     * {@link MycelialGeneratorBlockEntity#preRemoveSideEffects}; the block only updates its neighbours here.
+     */
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof MycelialGeneratorBlockEntity generator) {
-                generator.dropContents(level, pos);
-                level.updateNeighbourForOutputSignal(pos, this);
-            }
-            // Permanently destroyed (not a chunk unload): drop its manual links from both ends.
-            if (level instanceof ServerLevel serverLevel) {
-                ManualLinking.onGeneratorDestroyed(serverLevel, pos);
-            }
-        }
-        super.onRemove(state, level, pos, newState, movedByPiston);
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        Containers.updateNeighboursAfterDestroy(state, level, pos);
     }
 
     @Override
@@ -154,10 +146,10 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
 
     /** Comparator output follows the stored energy. */
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         if (level.getBlockEntity(pos) instanceof MycelialGeneratorBlockEntity generator) {
-            int stored = generator.getEnergyStorage().getEnergyStored();
-            int max = generator.getEnergyStorage().getMaxEnergyStored();
+            int stored = generator.getEnergyStorage().getAmountAsInt();
+            int max = generator.getEnergyStorage().getCapacityAsInt();
             return stored <= 0 ? 0 : 1 + (int) Math.floor(14.0D * stored / Math.max(1, max));
         }
         return 0;

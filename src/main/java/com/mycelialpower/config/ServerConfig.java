@@ -1,7 +1,7 @@
 package com.mycelialpower.config;
 
 import com.mycelialpower.fuel.FuelEntryParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
@@ -301,14 +301,14 @@ public final class ServerConfig {
     }
 
     private static boolean isResourceId(Object o) {
-        return o instanceof String s && ResourceLocation.tryParse(s) != null;
+        return o instanceof String s && Identifier.tryParse(s) != null;
     }
 
     private static boolean isResourceIdOrTag(Object o) {
         if (!(o instanceof String s)) {
             return false;
         }
-        return ResourceLocation.tryParse(s.startsWith("#") ? s.substring(1) : s) != null;
+        return Identifier.tryParse(s.startsWith("#") ? s.substring(1) : s) != null;
     }
 
     /** Whether the server config has been loaded (false on the title screen). */

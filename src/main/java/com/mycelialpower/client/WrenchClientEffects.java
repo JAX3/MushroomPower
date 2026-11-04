@@ -12,7 +12,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import org.joml.Vector3f;
 
 /**
  * Highlights the generator selected by the Mycelium Wrench the player is holding, with purple particles
@@ -20,7 +19,7 @@ import org.joml.Vector3f;
  * data component.
  */
 public final class WrenchClientEffects {
-    private static final DustParticleOptions SELECTION = new DustParticleOptions(new Vector3f(0.75F, 0.4F, 1.0F), 0.7F);
+    private static final DustParticleOptions SELECTION = new DustParticleOptions(0xBF66FF, 0.7F);
     private static final double MAX_DISTANCE_SQR = 64.0D * 64.0D;
     private static int ticks;
 
@@ -46,7 +45,7 @@ public final class WrenchClientEffects {
             if (minecraft.player.distanceToSqr(Vec3.atCenterOf(pos)) > MAX_DISTANCE_SQR) {
                 return;
             }
-            RandomSource random = minecraft.level.random;
+            RandomSource random = minecraft.level.getRandom();
             for (int i = 0; i < 6; i++) {
                 // A random point on one of the cube's 12 edges: two coordinates on a face boundary, one free.
                 double[] c = {random.nextInt(2), random.nextInt(2), random.nextInt(2)};

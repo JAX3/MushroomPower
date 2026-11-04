@@ -54,9 +54,13 @@ def generate_models(out):
     return [
         save_json(models.generator_model(False), assets, "models", "block", "mycelial_generator.json"),
         save_json(models.generator_model(True), assets, "models", "block", "mycelial_generator_on.json"),
-        save_json({"parent": f"{MOD_ID}:block/mycelial_generator"}, assets, "models", "item", "mycelial_generator.json"),
         save_json({"parent": "minecraft:item/handheld", "textures": {"layer0": f"{MOD_ID}:item/mycelium_wrench"}},
                   assets, "models", "item", "mycelium_wrench.json"),
+        # Item model definitions (assets/<ns>/items/, required since Minecraft 1.21.4)
+        save_json({"model": {"type": "minecraft:model", "model": f"{MOD_ID}:block/mycelial_generator"}},
+                  assets, "items", "mycelial_generator.json"),
+        save_json({"model": {"type": "minecraft:model", "model": f"{MOD_ID}:item/mycelium_wrench"}},
+                  assets, "items", "mycelium_wrench.json"),
         save_json(models.blockstate(), assets, "blockstates", "mycelial_generator.json"),
     ]
 

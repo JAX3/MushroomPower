@@ -1,6 +1,8 @@
 # Mycelial Power
 
-A NeoForge mod for **Minecraft 1.21.1** (Java 21) that adds one machine: the **Mycelial Generator**.
+A NeoForge mod for **Minecraft 26.1.2** (Java 25) that adds the **Mycelial Generator**.
+
+> **This is the `port/minecraft-26.1.2` branch.** It is an unverified port of the 1.21.1 version. See **[PORTING.md](PORTING.md)** for what changed and what still needs testing. The 1.21.1 version lives on the `claude/mycelial-power-generator-wipojt` branch.
 
 * Burns **mushrooms** and **water** to produce **Forge Energy (FE)**.
 * Generators touching on any of their six faces form a **network** whose output grows **exponentially**:
@@ -12,18 +14,18 @@ A NeoForge mod for **Minecraft 1.21.1** (Java 21) that adds one machine: the **M
 
 | | |
 |---|---|
-| Minecraft | 1.21.1 |
-| NeoForge | 21.1.x (built against 21.1.172) |
+| Minecraft | 26.1.2 |
+| NeoForge | 26.1.2.x (built against 26.1.2.126) |
 | Java | 21 |
-| JEI (optional) | 19.x for 1.21.1 (built against 19.21.0.247) |
+| JEI (optional) | 29.x for 26.1.2 (built against 29.37.0.100) |
 
 ---
 
 ## Installation (players and servers)
 
-1. Install NeoForge 21.1.x for Minecraft 1.21.1.
+1. Install NeoForge 26.1.2.x for Minecraft 26.1.2.
 2. Put `mycelialpower-1.1.0.jar` in the `mods/` folder of the client **and** the server.
-3. Optional: install JEI for 1.21.1. The mod runs normally without it.
+3. Optional: install JEI for 26.1.2. The mod runs normally without it.
 
 ## Usage
 
@@ -101,7 +103,7 @@ Adding a modded fuel takes one line:
 
 ## Building from source
 
-Requires JDK 21. Gradle 8.14.3 is downloaded by the wrapper.
+Requires **JDK 25**. Gradle 9.2.1 is downloaded by the wrapper.
 
 ```bash
 ./gradlew build                # compiles, runs unit tests, outputs build/libs/mycelialpower-1.1.0.jar
@@ -118,7 +120,7 @@ The build downloads from `maven.neoforged.net` (NeoForge, ModDevGradle tooling),
 ### IntelliJ IDEA
 
 1. **File → Open…** and select the project folder (the one with `build.gradle`). Choose **Open as Project** and trust it.
-2. In **Settings → Build, Execution, Deployment → Build Tools → Gradle**, set *Gradle JVM* to a JDK 21. Leave *Build and run using* on **Gradle**.
+2. In **Settings → Build, Execution, Deployment → Build Tools → Gradle**, set *Gradle JVM* to a JDK 25. IntelliJ IDEA 2025.2 or newer is needed for Java 25. Leave *Build and run using* on **Gradle**.
 3. Wait for the first Gradle sync. It decompiles Minecraft, which takes a few minutes. ModDevGradle generates the run configurations `Client`, `Server` and `GameTestServer`.
 4. Run **Client** from the run-configuration dropdown. If the configurations do not appear, run the Gradle task `neoforge ide setup › ideSyncTask` (or just re-sync Gradle).
 

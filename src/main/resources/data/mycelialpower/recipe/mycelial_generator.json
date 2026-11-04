@@ -2,21 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "B": {
-      "item": "minecraft:brown_mushroom"
-    },
-    "C": {
-      "item": "minecraft:cauldron"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "R": {
-      "item": "minecraft:red_mushroom"
-    },
-    "X": {
-      "item": "minecraft:redstone"
-    }
+    "B": "minecraft:brown_mushroom",
+    "C": "minecraft:cauldron",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:red_mushroom",
+    "X": "minecraft:redstone"
   },
   "pattern": [
     "IRI",

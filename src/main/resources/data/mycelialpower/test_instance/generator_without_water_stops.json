@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:function",
+  "function": "mycelialpower:generator_without_water_stops",
+  "environment": "mycelialpower:default",
+  "structure": "mycelialpower:empty",
+  "max_ticks": 100,
+  "required": true
+}

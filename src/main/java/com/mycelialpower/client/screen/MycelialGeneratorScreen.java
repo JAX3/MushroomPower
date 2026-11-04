@@ -8,23 +8,19 @@ import com.mycelialpower.network.ConnectionType;
 import com.mycelialpower.network.NetworkStatus;
 import com.mycelialpower.util.NumberFormatting;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +30,7 @@ import java.util.List;
  * formats it.
  */
 public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGeneratorMenu> {
-    public static final ResourceLocation TEXTURE = MycelialPower.id("textures/gui/mycelial_generator.png");
+    public static final Identifier TEXTURE = MycelialPower.id("textures/gui/mycelial_generator.png");
 
     // Layout (relative to leftPos/topPos). Must match textures/gui/mycelial_generator.png.
     public static final int ENERGY_X = 9, ENERGY_Y = 19, BAR_W = 14, BAR_H = 70;
@@ -51,35 +47,39 @@ public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGen
 
     private final List<HoverArea> hoverAreas = new ArrayList<>();
 
+    public static final int IMAGE_WIDTH = 256;
+    public static final int IMAGE_HEIGHT = 232;
+
     public MycelialGeneratorScreen(MycelialGeneratorMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title);
-        imageWidth = 256;
-        imageHeight = 232;
+        // Since 26.1 the background size is passed to the constructor (imageWidth/imageHeight are final).
+        super(menu, playerInventory, title, IMAGE_WIDTH, IMAGE_HEIGHT);
         titleLabelX = 8;
         titleLabelY = 6;
         inventoryLabelX = MycelialGeneratorMenu.PLAYER_INV_X;
         inventoryLabelY = MycelialGeneratorMenu.PLAYER_INV_Y - 11;
     }
 
+    /** Slot tooltips come from super; the info panel and bars add their own when no slot is hovered. */
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
-        if (menu.getCarried().isEmpty() && hoveredSlot == null) {
+    protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        super.extractTooltip(graphics, mouseX, mouseY);
+        if (menu.getCarried().isEmpty() && getHoveredSlot() == null) {
             for (HoverArea area : hoverAreas) {
                 if (area.contains(mouseX - leftPos, mouseY - topPos)) {
-                    graphics.renderComponentTooltip(font, area.lines(), mouseX, mouseY);
+                    graphics.setComponentTooltipForNextFrame(font, area.lines(), mouseX, mouseY);
                     break;
                 }
             }
         }
     }
 
+    /** Replaces the old renderBg (removed in 26.1): super draws the dimmed world, then our panel. */
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         int x = leftPos;
         int y = topPos;
-        graphics.blit(TEXTURE, x, y, 0, 0, imageWidth, imageHeight, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, imageWidth, imageHeight, 256, 256);
         GeneratorStatus s = menu.getStatus();
 
         // Energy bar
@@ -122,41 +122,29 @@ public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGen
         }
     }
 
-    private void renderFluid(GuiGraphics graphics, GeneratorStatus s, int x, int y) {
+    /**
+     * Draws the tank level as a coloured gradient. (26.1 replaced the fluid texture lookup used before;
+     * a plain gradient keeps the GUI independent of fluid model internals.)
+     */
+    private void renderFluid(GuiGraphicsExtractor graphics, GeneratorStatus s, int x, int y) {
         int height = scaled(s.fluidAmount(), s.tankCapacity(), BAR_H);
         if (height <= 0 || s.fluidId().isEmpty()) {
             return;
         }
-        ResourceLocation id = ResourceLocation.tryParse(s.fluidId());
-        Fluid fluid = id == null ? Fluids.WATER : BuiltInRegistries.FLUID.get(id);
-        FluidStack stack = new FluidStack(fluid == Fluids.EMPTY ? Fluids.WATER : fluid, Math.max(1, s.fluidAmount()));
-        IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(stack.getFluid());
-        ResourceLocation stillTexture = extensions.getStillTexture(stack);
-        if (stillTexture == null) {
-            graphics.fill(x, y + BAR_H - height, x + BAR_W, y + BAR_H, 0xFF3F76E4);
-            return;
-        }
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(stillTexture);
-        int tint = extensions.getTintColor(stack);
-        float r = ((tint >> 16) & 0xFF) / 255.0F;
-        float g = ((tint >> 8) & 0xFF) / 255.0F;
-        float b = (tint & 0xFF) / 255.0F;
-        float a = ((tint >> 24) & 0xFF) / 255.0F;
-        if (a <= 0) {
-            a = 1.0F;
-        }
-        int top = y + BAR_H - height;
-        graphics.enableScissor(x, top, x + BAR_W, y + BAR_H);
-        for (int tileY = y + BAR_H - 16; tileY > top - 16; tileY -= 16) {
-            graphics.blit(x, tileY, 0, 16, 16, sprite, r, g, b, a);
-        }
-        graphics.disableScissor();
+        Identifier id = Identifier.tryParse(s.fluidId());
+        Fluid fluid = id == null ? Fluids.WATER : BuiltInRegistries.FLUID.getValue(id);
+        boolean water = fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER || fluid == Fluids.EMPTY;
+        int top = water ? 0xFF5A8CFF : 0xFFB0B0B0;
+        int bottom = water ? 0xFF2A4FC0 : 0xFF707070;
+        graphics.fillGradient(x, y + BAR_H - height, x + BAR_W, y + BAR_H, top, bottom);
+        // A lighter surface line, like the top of the water.
+        graphics.fill(x, y + BAR_H - height, x + BAR_W, y + BAR_H - height + 1, water ? 0xFF9CC0FF : 0xFFD0D0D0);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, titleLabelX, titleLabelY, 0xFFE6DBFF, false);
-        graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFFC8C8D0, false);
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        graphics.text(font, title, titleLabelX, titleLabelY, 0xFFE6DBFF, false);
+        graphics.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFFC8C8D0, false);
 
         GeneratorStatus s = menu.getStatus();
         hoverAreas.clear();
@@ -289,7 +277,7 @@ public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGen
         hoverAreas.add(new HoverArea(BURN_X, BURN_Y, BURN_W, BURN_H, burnTooltip));
     }
 
-    private void row(GuiGraphics graphics, int index, String headerKey, Component value, List<Component> tooltip) {
+    private void row(GuiGraphicsExtractor graphics, int index, String headerKey, Component value, List<Component> tooltip) {
         int y = PANEL_Y + index * ROW_H;
         MutableComponent line = Component.empty();
         if (headerKey != null) {
@@ -302,29 +290,30 @@ public class MycelialGeneratorScreen extends AbstractContainerScreen<MycelialGen
         hoverAreas.add(new HoverArea(PANEL_X, y - 1, PANEL_W, ROW_H, tooltip));
     }
 
-    private void drawSmall(GuiGraphics graphics, Component text, int x, int y, int color) {
-        graphics.pose().pushPose();
-        graphics.pose().translate(x, y, 0);
-        graphics.pose().scale(TEXT_SCALE, TEXT_SCALE, 1.0F);
-        graphics.drawString(font, text, 0, 0, color, false);
-        graphics.pose().popPose();
+    private void drawSmall(GuiGraphicsExtractor graphics, Component text, int x, int y, int color) {
+        // Since 1.21.6 the GUI pose is a 2D Matrix3x2fStack.
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(TEXT_SCALE, TEXT_SCALE);
+        graphics.text(font, text, 0, 0, color, false);
+        graphics.pose().popMatrix();
     }
 
     private static Component fuelName(String itemId) {
-        ResourceLocation id = ResourceLocation.tryParse(itemId);
+        Identifier id = Identifier.tryParse(itemId);
         if (id == null) {
             return Component.literal(itemId);
         }
-        Item item = BuiltInRegistries.ITEM.get(id);
+        Item item = BuiltInRegistries.ITEM.getValue(id);
         return new ItemStack(item).getHoverName();
     }
 
     private static Component fluidName(String fluidId) {
-        ResourceLocation id = ResourceLocation.tryParse(fluidId);
+        Identifier id = Identifier.tryParse(fluidId);
         if (id == null) {
             return Component.literal(fluidId);
         }
-        Fluid fluid = BuiltInRegistries.FLUID.get(id);
+        Fluid fluid = BuiltInRegistries.FLUID.getValue(id);
         return fluid.getFluidType().getDescription();
     }
 

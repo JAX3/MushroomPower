@@ -14,14 +14,15 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 
@@ -30,8 +31,8 @@ import java.util.List;
 
 /** JEI category listing every mushroom fuel with its generation, duration and water use. */
 public class MycelialGeneratorCategory implements IRecipeCategory<MycelialFuelRecipe> {
-    public static final RecipeType<MycelialFuelRecipe> TYPE = RecipeType.create(MycelialPower.MOD_ID, "mycelial_generator", MycelialFuelRecipe.class);
-    public static final ResourceLocation TEXTURE = MycelialPower.id("textures/gui/jei_mycelial_generator.png");
+    public static final IRecipeType<MycelialFuelRecipe> TYPE = IRecipeType.create(MycelialPower.MOD_ID, "mycelial_generator", MycelialFuelRecipe.class);
+    public static final Identifier TEXTURE = MycelialPower.id("textures/gui/jei_mycelial_generator.png");
 
     public static final int WIDTH = 168;
     public static final int HEIGHT = 74;
@@ -49,7 +50,7 @@ public class MycelialGeneratorCategory implements IRecipeCategory<MycelialFuelRe
     }
 
     @Override
-    public RecipeType<MycelialFuelRecipe> getRecipeType() {
+    public IRecipeType<MycelialFuelRecipe> getRecipeType() {
         return TYPE;
     }
 
@@ -63,22 +64,14 @@ public class MycelialGeneratorCategory implements IRecipeCategory<MycelialFuelRe
         return icon;
     }
 
-    /** Present in newer JEI 19.x builds; harmless where it does not exist. */
+    @Override
     public int getWidth() {
         return WIDTH;
     }
 
+    @Override
     public int getHeight() {
         return HEIGHT;
-    }
-
-    /**
-     * Older JEI 19.x builds require a background, newer ones deprecate it in favour of getWidth/getHeight
-     * but still draw it. Providing both keeps the category working on the whole 19.x line.
-     */
-    @SuppressWarnings({"deprecation", "removal"})
-    public IDrawable getBackground() {
-        return background;
     }
 
     @Override
@@ -89,38 +82,44 @@ public class MycelialGeneratorCategory implements IRecipeCategory<MycelialFuelRe
         IRecipeSlotBuilder water = builder.addSlot(RecipeIngredientRole.INPUT, 7, 27);
         long amount = Math.max(1, recipe.waterPerItem());
         for (Fluid fluid : recipe.fluids()) {
-            water.addFluidStack(fluid, amount);
+            water.add(fluid, amount);
         }
         water.setFluidRenderer(Math.max(amount, ServerConfig.get(ServerConfig.TANK_CAPACITY)), false, 14, 40);
     }
 
     @Override
-    public void draw(MycelialFuelRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+    public void draw(MycelialFuelRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
+        // JEI 29 categories have no background method; draw the panel here.
+        background.draw(graphics);
         Font font = Minecraft.getInstance().font;
         var def = recipe.definition();
         int y = 4;
-        graphics.drawString(font, Component.translatable("jei.mycelialpower.burn_time",
+        graphics.text(font, Component.translatable("jei.mycelialpower.burn_time",
                 NumberFormatting.ticksToTime(def.burnTicks()), NumberFormatting.grouped(def.burnTicks())), TEXT_X, y, 0xFFE6DBFF, false);
         y += 11;
-        graphics.drawString(font, Component.translatable("jei.mycelialpower.generation",
+        graphics.text(font, Component.translatable("jei.mycelialpower.generation",
                 NumberFormatting.decimal(recipe.fePerTick())), TEXT_X, y, 0xFFC77DFF, false);
         y += 11;
-        graphics.drawString(font, Component.translatable("jei.mycelialpower.total_energy",
+        graphics.text(font, Component.translatable("jei.mycelialpower.total_energy",
                 NumberFormatting.compact(recipe.totalEnergy())), TEXT_X, y, 0xFFC77DFF, false);
         y += 11;
-        graphics.drawString(font, Component.translatable("jei.mycelialpower.water",
+        graphics.text(font, Component.translatable("jei.mycelialpower.water",
                 NumberFormatting.grouped(recipe.waterPerItem())), TEXT_X, y, 0xFF7FB6FF, false);
         y += 11;
-        graphics.drawString(font, Component.translatable("jei.mycelialpower.multipliers",
+        graphics.text(font, Component.translatable("jei.mycelialpower.multipliers",
                 NumberFormatting.decimal(def.energyMultiplier()), NumberFormatting.decimal(def.waterMultiplier())), TEXT_X, y, 0xFFB0B0BE, false);
         y += 11;
-        graphics.drawString(font, Component.translatable("jei.mycelialpower.bonuses",
+        graphics.text(font, Component.translatable("jei.mycelialpower.bonuses",
                 NumberFormatting.decimal(def.myceliumBonus()), NumberFormatting.decimal(def.scalingBonus())), TEXT_X, y, 0xFF8FD27A, false);
     }
 
-    @SuppressWarnings({"deprecation", "removal"})
-    public List<Component> getTooltipStrings(MycelialFuelRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
-        if (mouseX < TEXT_X || mouseX > WIDTH) {
+    @Override
+    public void getTooltip(ITooltipBuilder tooltip, MycelialFuelRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+        tooltip.addAll(tooltipLines(recipe, mouseX, mouseY));
+    }
+
+    private static List<Component> tooltipLines(MycelialFuelRecipe recipe, double mouseX, double mouseY) {
+        if (mouseX < TEXT_X || mouseX > WIDTH || mouseY < 4) {
             return List.of();
         }
         int row = (int) ((mouseY - 4) / 11);

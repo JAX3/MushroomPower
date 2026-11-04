@@ -11,7 +11,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +22,8 @@ import java.util.Set;
  */
 public final class ManualLinking {
     // Red and white, like the red mushroom in the generator's window.
-    private static final DustParticleOptions LINK_RED = new DustParticleOptions(new Vector3f(1.0F, 0.2F, 0.22F), 1.0F);
-    private static final DustParticleOptions LINK_WHITE = new DustParticleOptions(new Vector3f(1.0F, 0.97F, 0.95F), 0.8F);
+    private static final DustParticleOptions LINK_RED = new DustParticleOptions(0xFF3338, 1.0F);
+    private static final DustParticleOptions LINK_WHITE = new DustParticleOptions(0xFFF7F2, 0.8F);
     private static final int MAX_PARTICLE_POINTS = 96;
 
     private ManualLinking() {

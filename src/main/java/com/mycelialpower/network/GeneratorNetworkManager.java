@@ -44,7 +44,7 @@ import java.util.function.Consumer;
 public final class GeneratorNetworkManager {
     private static final Direction[] DIRECTIONS = Direction.values();
     private static final Comparator<GlobalPos> ORDER = Comparator
-            .comparing((GlobalPos p) -> p.dimension().location())
+            .comparing((GlobalPos p) -> p.dimension().identifier())
             .thenComparingLong(p -> p.pos().asLong());
 
     @Nullable

@@ -130,7 +130,7 @@ public final class MyceliumSpreadManager {
             return false;
         }
         BlockPos stem = ground.above();
-        if (!level.isEmptyBlock(stem) || stem.getY() + HUGE_MUSHROOM_MAX_HEIGHT >= level.getMaxBuildHeight()) {
+        if (!level.isEmptyBlock(stem) || stem.getY() + HUGE_MUSHROOM_MAX_HEIGHT >= level.getMaxY()) {
             return false;
         }
         if (!level.hasChunksAt(stem.getX() - HUGE_MUSHROOM_RADIUS, stem.getZ() - HUGE_MUSHROOM_RADIUS,
@@ -143,7 +143,7 @@ public final class MyceliumSpreadManager {
         boolean red = random.nextDouble() < ServerConfig.get(ServerConfig.HUGE_MUSHROOM_RED_RATIO);
         ResourceKey<ConfiguredFeature<?, ?>> key = red ? TreeFeatures.HUGE_RED_MUSHROOM : TreeFeatures.HUGE_BROWN_MUSHROOM;
         Optional<Holder.Reference<ConfiguredFeature<?, ?>>> feature =
-                level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getHolder(key);
+                level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(key);
         if (feature.isEmpty()) {
             return false;
         }
@@ -210,7 +210,7 @@ public final class MyceliumSpreadManager {
             }
         }
         level.gameEvent(null, GameEvent.BLOCK_CHANGE, target);
-        level.playSound(null, target, SoundEvents.FUNGUS_PLACE, SoundSource.BLOCKS, 0.6F, 0.9F + level.random.nextFloat() * 0.2F);
+        level.playSound(null, target, SoundEvents.FUNGUS_PLACE, SoundSource.BLOCKS, 0.6F, 0.9F + level.getRandom().nextFloat() * 0.2F);
         level.levelEvent(2001, target, Block.getId(newState));
         return true;
     }

@@ -26,12 +26,9 @@ import com.mycelialpower.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.HolderLookup;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
@@ -43,14 +40,19 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -79,7 +81,7 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
     private final EnergyAccumulator accumulator = new EnergyAccumulator();
 
     @SuppressWarnings("unchecked")
-    private final BlockCapabilityCache<IEnergyStorage, Direction>[] energyCaches = new BlockCapabilityCache[6];
+    private final BlockCapabilityCache<EnergyHandler, Direction>[] energyCaches = new BlockCapabilityCache[6];
 
     // Fuel (snapshot of the definition that was consumed, so config edits never alter an item mid-burn)
     private int burnRemaining;
@@ -152,9 +154,24 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         registered = false;
     }
 
-    /** Drops the inventory. Called once by the block when it is broken or replaced. */
+    /**
+     * Called once when the block is broken or replaced (never on chunk unload): drops the inventory and
+     * removes this generator's manual links from both ends.
+     */
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (level != null) {
+            dropContents(level, pos);
+        }
+        if (level instanceof ServerLevel serverLevel) {
+            ManualLinking.onGeneratorDestroyed(serverLevel, pos);
+        }
+    }
+
+    /** Drops the inventory into the world. */
     public void dropContents(Level level, BlockPos pos) {
-        for (int slot = 0; slot < inventory.getSlots(); slot++) {
+        for (int slot = 0; slot < inventory.size(); slot++) {
             ItemStack stack = inventory.getStackInSlot(slot);
             if (!stack.isEmpty()) {
                 Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack.copy());
@@ -241,8 +258,8 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
     }
 
     private void updateComparators(ServerLevel level, BlockState blockState) {
-        int stored = energy.getEnergyStored();
-        int signal = stored <= 0 ? 0 : 1 + (int) Math.floor(14.0D * stored / Math.max(1, energy.getMaxEnergyStored()));
+        int stored = energy.getAmountAsInt();
+        int signal = stored <= 0 ? 0 : 1 + (int) Math.floor(14.0D * stored / Math.max(1, energy.getCapacityAsInt()));
         if (signal != lastComparatorSignal) {
             lastComparatorSignal = signal;
             level.updateNeighbourForOutputSignal(worldPosition, blockState.getBlock());
@@ -262,7 +279,7 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         fuelScalingBonus = definition.scalingBonus();
         burnTotal = definition.burnTicks();
         burnRemaining = burnTotal;
-        inventory.extractItem(GeneratorItemHandler.FUEL_SLOT, 1, false);
+        inventory.shrink(GeneratorItemHandler.FUEL_SLOT);
         setChanged();
     }
 
@@ -282,14 +299,14 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         lastExactOutput = exact;
         EnergyRounding rounding = ServerConfig.get(ServerConfig.ROUNDING);
         int produced = accumulator.produce(exact, rounding);
-        int stored = energy.receiveInternal(produced, false);
+        int stored = energy.receiveInternal(produced);
         int leftover = produced - stored;
         if (leftover > 0 && shareResources) {
             for (MycelialGeneratorBlockEntity member : network.members()) {
                 if (member == this || member.isRemoved()) {
                     continue;
                 }
-                leftover -= member.energy.receiveInternal(leftover, false);
+                leftover -= member.energy.receiveInternal(leftover);
                 if (leftover <= 0) {
                     break;
                 }
@@ -320,38 +337,42 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
             return;
         }
         outputTimer = 0;
-        if (!ServerConfig.get(ServerConfig.AUTO_OUTPUT) || energy.getEnergyStored() <= 0) {
+        if (!ServerConfig.get(ServerConfig.AUTO_OUTPUT) || energy.getAmountAsInt() <= 0) {
             return;
         }
         long budgetLong = (long) ServerConfig.get(ServerConfig.OUTPUT_TRANSFER_RATE) * interval;
         int budget = (int) Math.min(Integer.MAX_VALUE, budgetLong);
         for (Direction direction : DIRECTIONS) {
-            if (budget <= 0 || energy.getEnergyStored() <= 0) {
+            if (budget <= 0 || energy.getAmountAsInt() <= 0) {
                 break;
             }
             BlockPos neighbourPos = worldPosition.relative(direction);
             if (!level.isLoaded(neighbourPos)) {
                 continue;
             }
-            IEnergyStorage target = energyCache(level, direction).getCapability();
-            if (target == null || target == energy || !target.canReceive()) {
+            EnergyHandler target = energyCache(level, direction).getCapability();
+            if (target == null || target == energy) {
                 continue;
             }
-            int offer = energy.extractInternal(budget, true);
-            int accepted = target.receiveEnergy(offer, false);
-            accepted = Math.max(0, Math.min(accepted, offer));
+            int offer = Math.min(budget, energy.getAmountAsInt());
+            int accepted;
+            // The neighbour's insert is transactional; our buffer is only reduced once it has committed.
+            try (Transaction transaction = Transaction.openRoot()) {
+                accepted = Math.max(0, Math.min(offer, target.insert(offer, transaction)));
+                transaction.commit();
+            }
             if (accepted > 0) {
-                energy.extractInternal(accepted, false);
+                energy.extractInternal(accepted);
                 budget -= accepted;
             }
         }
     }
 
-    private BlockCapabilityCache<IEnergyStorage, Direction> energyCache(ServerLevel level, Direction direction) {
+    private BlockCapabilityCache<EnergyHandler, Direction> energyCache(ServerLevel level, Direction direction) {
         int index = direction.ordinal();
-        BlockCapabilityCache<IEnergyStorage, Direction> cache = energyCaches[index];
+        BlockCapabilityCache<EnergyHandler, Direction> cache = energyCaches[index];
         if (cache == null) {
-            cache = BlockCapabilityCache.create(Capabilities.EnergyStorage.BLOCK, level, worldPosition.relative(direction), direction.getOpposite());
+            cache = BlockCapabilityCache.create(Capabilities.Energy.BLOCK, level, worldPosition.relative(direction), direction.getOpposite());
             energyCaches[index] = cache;
         }
         return cache;
@@ -418,13 +439,13 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         if (drain <= 0) {
             return;
         }
-        int remaining = drain - tank.drain(drain, IFluidHandler.FluidAction.EXECUTE).getAmount();
+        int remaining = drain - tank.drainInternal(drain);
         if (remaining > 0 && shareResources) {
             for (MycelialGeneratorBlockEntity member : network.members()) {
                 if (member == this || member.isRemoved()) {
                     continue;
                 }
-                remaining -= member.tank.drain(remaining, IFluidHandler.FluidAction.EXECUTE).getAmount();
+                remaining -= member.tank.drainInternal(remaining);
                 if (remaining <= 0) {
                     break;
                 }
@@ -432,26 +453,35 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         }
     }
 
+    /**
+     * Empties one fluid container from the bucket slot into the tank. The container is copied into a
+     * temporary one-slot handler so the transfer API can turn it into its empty form; everything happens in
+     * one transaction that is only committed if the emptied container fits into the output slot.
+     */
     private void processFluidContainer() {
         ItemStack container = inventory.getStackInSlot(GeneratorItemHandler.CONTAINER_IN_SLOT);
         if (container.isEmpty()) {
             return;
         }
-        ItemStack single = container.copyWithCount(1);
-        FluidActionResult simulated = FluidUtil.tryEmptyContainer(single, tank, Integer.MAX_VALUE, null, false);
-        if (!simulated.isSuccess()) {
+        ItemStacksResourceHandler scratch = new ItemStacksResourceHandler(1);
+        scratch.set(0, ItemResource.of(container), 1);
+        ResourceHandler<FluidResource> source = ItemAccess.forHandlerIndex(scratch, 0).getCapability(Capabilities.Fluid.ITEM);
+        if (source == null) {
             return;
         }
-        ItemStack result = simulated.getResult();
-        if (!inventory.insertOutput(result, true).isEmpty()) {
-            return;
+        try (Transaction transaction = Transaction.openRoot()) {
+            int moved = ResourceHandlerUtil.move(source, tank, resource -> true, Integer.MAX_VALUE, transaction);
+            if (moved <= 0) {
+                return;
+            }
+            ItemStack emptied = scratch.getResource(0).toStack(scratch.getAmountAsInt(0));
+            if (!inventory.canOutput(emptied)) {
+                return; // output slot full: abort, nothing changes
+            }
+            transaction.commit();
+            inventory.shrink(GeneratorItemHandler.CONTAINER_IN_SLOT);
+            inventory.addOutput(emptied);
         }
-        FluidActionResult executed = FluidUtil.tryEmptyContainer(single, tank, Integer.MAX_VALUE, null, true);
-        if (!executed.isSuccess()) {
-            return;
-        }
-        inventory.extractItem(GeneratorItemHandler.CONTAINER_IN_SLOT, 1, false);
-        inventory.insertOutput(executed.getResult(), false);
     }
 
     // ------------------------------------------------------------------ mycelium
@@ -472,14 +502,14 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         boolean shared = ServerConfig.get(ServerConfig.SHARE_CHANCE);
         double current = shared ? network.sharedChance() : chance;
         double max = ServerConfig.maxChance();
-        if (MyceliumChance.succeeds(current, level.random.nextDouble())) {
+        if (MyceliumChance.succeeds(current, level.getRandom().nextDouble())) {
             int conversions = MyceliumChance.conversionsPerAttempt(
                     ServerConfig.get(ServerConfig.MAX_CONVERSIONS),
                     network.activeCount(),
                     ServerConfig.get(ServerConfig.NETWORK_EXTRA_CONVERSIONS),
                     ServerConfig.get(ServerConfig.GENERATORS_PER_EXTRA),
                     ServerConfig.get(ServerConfig.MAX_EXTRA_CONVERSIONS));
-            MyceliumSpreadManager.ConversionResult outcome = MyceliumSpreadManager.convert(level, worldPosition, targets, conversions, level.random);
+            MyceliumSpreadManager.ConversionResult outcome = MyceliumSpreadManager.convert(level, worldPosition, targets, conversions, level.getRandom());
             int converted = outcome.converted();
             hugeMushroomsThisSession += outcome.hugeMushrooms();
             if (converted > 0) {
@@ -562,7 +592,7 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         double waterRate = network == null ? ServerConfig.get(ServerConfig.WATER_PER_INTERVAL) : waterPerInterval(network);
         double perTick = active ? lastExactOutput : (network == null ? 0.0D : previewOutput(network));
         return new GeneratorStatus(
-                energy.getEnergyStored(), energy.getMaxEnergyStored(), perTick, active, extractionRate,
+                energy.getAmountAsInt(), energy.getCapacityAsInt(), perTick, active, extractionRate,
                 fluidId, tank.getFluidAmount(), tank.getCapacity(), waterRate, ServerConfig.get(ServerConfig.WATER_INTERVAL),
                 burnRemaining > 0 ? fuelItemId : "", burnRemaining, burnTotal,
                 size, activeMembers, scale, total, networkStatus.ordinal(), ServerConfig.get(ServerConfig.MAX_NETWORK_SIZE),
@@ -621,7 +651,7 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         return inventory;
     }
 
-    public IItemHandler getAutomationItemHandler() {
+    public ResourceHandler<ItemResource> getAutomationItemHandler() {
         return automationItems;
     }
 
@@ -629,7 +659,7 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
         return tank;
     }
 
-    public IFluidHandler getExternalFluidHandler() {
+    public ResourceHandler<FluidResource> getExternalFluidHandler() {
         return externalFluid;
     }
 
@@ -665,77 +695,56 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
     // ------------------------------------------------------------------ persistence
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.put("Inventory", inventory.serializeNBT(registries));
-        CompoundTag tankTag = new CompoundTag();
-        tank.writeToNBT(registries, tankTag);
-        tag.put("Tank", tankTag);
-        tag.putInt("Energy", energy.getEnergyStored());
-        tag.putDouble("EnergyRemainder", accumulator.getRemainder());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putChild("Inventory", inventory);
+        output.putChild("Tank", tank);
+        output.putInt("Energy", energy.getAmountAsInt());
+        output.store("EnergyRemainder", Codec.DOUBLE, accumulator.getRemainder());
 
-        CompoundTag fuel = new CompoundTag();
+        ValueOutput fuel = output.child("Fuel");
         fuel.putInt("Remaining", burnRemaining);
         fuel.putInt("Total", burnTotal);
         fuel.putString("Item", fuelItemId);
-        fuel.putDouble("EnergyMultiplier", fuelEnergyMultiplier);
-        fuel.putDouble("WaterMultiplier", fuelWaterMultiplier);
-        fuel.putDouble("MyceliumBonus", fuelMyceliumBonus);
-        fuel.putDouble("ScalingBonus", fuelScalingBonus);
-        tag.put("Fuel", fuel);
+        fuel.store("EnergyMultiplier", Codec.DOUBLE, fuelEnergyMultiplier);
+        fuel.store("WaterMultiplier", Codec.DOUBLE, fuelWaterMultiplier);
+        fuel.store("MyceliumBonus", Codec.DOUBLE, fuelMyceliumBonus);
+        fuel.store("ScalingBonus", Codec.DOUBLE, fuelScalingBonus);
 
-        tag.putInt("WaterTimer", waterTimer);
-        tag.putDouble("WaterRemainder", waterRemainder);
-        tag.putDouble("MyceliumChance", getOwnChance());
-        tag.putInt("MyceliumTimer", attemptTimer);
-        tag.putLong("NetworkId", networkId);
-        tag.putBoolean("Active", active);
+        output.putInt("WaterTimer", waterTimer);
+        output.store("WaterRemainder", Codec.DOUBLE, waterRemainder);
+        output.store("MyceliumChance", Codec.DOUBLE, getOwnChance());
+        output.putInt("MyceliumTimer", attemptTimer);
+        output.putLong("NetworkId", networkId);
+        output.putBoolean("Active", active);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains("Inventory")) {
-            CompoundTag inv = tag.getCompound("Inventory");
-            inv.putInt("Size", GeneratorItemHandler.SLOTS);
-            inventory.deserializeNBT(registries, inv);
-        }
-        if (tag.contains("Tank")) {
-            tank.readFromNBT(registries, tag.getCompound("Tank"));
-        }
-        energy.setEnergy(tag.getInt("Energy"));
-        accumulator.setRemainder(tag.getDouble("EnergyRemainder"));
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        input.readChild("Inventory", inventory);
+        input.readChild("Tank", tank);
+        energy.setEnergy(input.getIntOr("Energy", 0));
+        accumulator.setRemainder(input.read("EnergyRemainder", Codec.DOUBLE).orElse(0.0D));
 
-        CompoundTag fuel = tag.getCompound("Fuel");
-        burnRemaining = Math.max(0, fuel.getInt("Remaining"));
-        burnTotal = Math.max(burnRemaining, fuel.getInt("Total"));
-        fuelItemId = fuel.getString("Item");
-        fuelEnergyMultiplier = fuel.contains("EnergyMultiplier") ? clampNonNegative(fuel.getDouble("EnergyMultiplier")) : 1.0D;
-        fuelWaterMultiplier = fuel.contains("WaterMultiplier") ? clampNonNegative(fuel.getDouble("WaterMultiplier")) : 1.0D;
-        fuelMyceliumBonus = fuel.contains("MyceliumBonus") ? clampNonNegative(fuel.getDouble("MyceliumBonus")) : 1.0D;
-        fuelScalingBonus = clampNonNegative(fuel.getDouble("ScalingBonus"));
+        ValueInput fuel = input.childOrEmpty("Fuel");
+        burnRemaining = Math.max(0, fuel.getIntOr("Remaining", 0));
+        burnTotal = Math.max(burnRemaining, fuel.getIntOr("Total", 0));
+        fuelItemId = fuel.read("Item", Codec.STRING).orElse("");
+        fuelEnergyMultiplier = clampNonNegative(fuel.read("EnergyMultiplier", Codec.DOUBLE).orElse(1.0D));
+        fuelWaterMultiplier = clampNonNegative(fuel.read("WaterMultiplier", Codec.DOUBLE).orElse(1.0D));
+        fuelMyceliumBonus = clampNonNegative(fuel.read("MyceliumBonus", Codec.DOUBLE).orElse(1.0D));
+        fuelScalingBonus = clampNonNegative(fuel.read("ScalingBonus", Codec.DOUBLE).orElse(0.0D));
 
-        waterTimer = Math.max(0, tag.getInt("WaterTimer"));
-        waterRemainder = Math.max(0.0D, Math.min(0.999999D, tag.getDouble("WaterRemainder")));
-        chance = tag.contains("MyceliumChance") ? MyceliumChance.clamp(tag.getDouble("MyceliumChance"), 1.0D) : -1.0D;
-        attemptTimer = Math.max(0, tag.getInt("MyceliumTimer"));
-        networkId = tag.getLong("NetworkId");
-        active = tag.getBoolean("Active");
+        waterTimer = Math.max(0, input.getIntOr("WaterTimer", 0));
+        waterRemainder = Math.max(0.0D, Math.min(0.999999D, input.read("WaterRemainder", Codec.DOUBLE).orElse(0.0D)));
+        chance = input.read("MyceliumChance", Codec.DOUBLE).map(value -> MyceliumChance.clamp(value, 1.0D)).orElse(-1.0D);
+        attemptTimer = Math.max(0, input.getIntOr("MyceliumTimer", 0));
+        networkId = input.getLongOr("NetworkId", 0L);
+        active = input.getBooleanOr("Active", false);
     }
 
     private static double clampNonNegative(double value) {
         return Double.isFinite(value) && value > 0 ? value : 0.0D;
-    }
-
-    /** Only the block state is needed on the client (the GUI uses its own packet), so keep chunk data small. */
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return new CompoundTag();
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket() {
-        return null;
     }
 }
