@@ -53,7 +53,8 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
     /** Light emitted while running; set from the config by the block entity. */
     public static final IntegerProperty LIGHT = IntegerProperty.create("light", 0, 15);
 
-    private static final DustParticleOptions ENERGY_DUST = new DustParticleOptions(new Vector3f(0.62F, 0.35F, 1.0F), 0.8F);
+    // Matches the glowing red mushroom in the front window (#ff5a5a).
+    private static final DustParticleOptions ENERGY_DUST = new DustParticleOptions(new Vector3f(1.0F, 0.35F, 0.35F), 0.8F);
 
     public MycelialGeneratorBlock(Properties properties) {
         super(properties);
