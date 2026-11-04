@@ -38,7 +38,7 @@ Invalid values are corrected by NeoForge to the default (with a warning in the l
 
 | Key | Default | Range | Description |
 |---|---|---|---|
-| `baseGeneration` | `40.0` | 0–1,000,000 | FE/t of one running generator, before multipliers. |
+| `baseGeneration` | `200.0` | 0–1,000,000 | FE/t of one running generator, before multipliers. |
 | `maxEnergyStorage` | `100000` | 1–2,147,483,647 | Internal buffer in FE. |
 | `outputTransferRate` | `4000` | 0–2,147,483,647 | Max FE/t pushed to or pulled by neighbours. |
 | `autoOutput` | `true` | | Push energy into adjacent receivers automatically. |
@@ -51,7 +51,7 @@ Invalid values are corrected by NeoForge to the default (with a warning in the l
 Network FE/t = baseGeneration × N × scalingMultiplier^(N − 1)
 ```
 
-Each generator produces `baseGeneration × fuelEnergy × (scalingMultiplier + fuelScaling)^(N − 1)`. With identical fuel, the network total is exactly the formula above. With the defaults: 1 → 40, 2 → 96, 3 → 173, 4 → 276, 5 → 415, 10 → 2,064 FE/t.
+Each generator produces `baseGeneration × fuelEnergy × (scalingMultiplier + fuelScaling)^(N − 1)`. With identical fuel, the network total is exactly the formula above. With the defaults: 1 → 200, 2 → 480, 3 → 864, 4 → 1,382, 5 → 2,074, 10 → 10,320 FE/t.
 
 | Key | Default | Range | Description |
 |---|---|---|---|

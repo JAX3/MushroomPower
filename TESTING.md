@@ -20,16 +20,16 @@ This starts a headless server, runs every `@GameTest` in `GeneratorGameTests`, t
 
 | GameTest | Checks |
 |---|---|
-| `singleGeneratorProducesEnergy` | A generator burns one mushroom, uses water and produces 50 FE/t on red mushrooms |
+| `singleGeneratorProducesEnergy` | A generator burns one mushroom, uses water and produces 250 FE/t on red mushrooms |
 | `adjacentGeneratorsFormOneNetwork` | Touching generators share a network in every direction; a detached one doesn't |
-| `threeGeneratorsScaleExponentially` | 3 running generators give 57.6 FE/t each (172.8 total) |
+| `threeGeneratorsScaleExponentially` | 3 running generators give 288 FE/t each (864 total) |
 | `networkSplitsWhenGeneratorRemoved` | Breaking the middle of a line splits the network |
 | `generatorWithoutWaterStops` | No water: state NO_WATER, no FE, the mushroom is kept |
 | `myceliumConvertsDirt` | A 100% chance converts dirt with air above into mycelium |
 | `convertedBlockSproutsHugeMushroom` | With a 100% chance, dirt 4 blocks away turns into mycelium and grows a huge mushroom (uses the taller `tall_empty` structure) |
 | `stateSurvivesSaveAndLoad` | Energy, burn progress, water, chance and inventory survive a save/load |
 | `hugeMultiplierDoesNotOverflow` | Extreme values stay within int range |
-| `manualLinkJoinsDistantGenerators` | Two generators 5 blocks apart, linked by wrench: one network, 48 FE/t each, connection MANUAL |
+| `manualLinkJoinsDistantGenerators` | Two generators 5 blocks apart, linked by wrench: one network, 240 FE/t each, connection MANUAL |
 | `unlinkingSplitsNetwork` | Removing a generator's links splits a link-only network |
 | `destroyedGeneratorLosesLinks` | Breaking a linked generator removes the link from its partner too |
 | `duplicateLinksRejectedAndChainsMerge` | Reverse duplicates and self links are refused; A–B plus B–C makes one network of 3 |
@@ -41,9 +41,9 @@ This starts a headless server, runs every `@GameTest` in `GeneratorGameTests`, t
 Run `./gradlew runClient` and create a **creative, superflat** world with cheats on. Items are in the **Mycelial Power** creative tab.
 
 ### Generator basics
-1. Place a generator, right-click it with a water bucket, and put red mushrooms in the top slot. The lamp turns green and the GUI shows **+50 FE/t**.
+1. Place a generator, right-click it with a water bucket, and put red mushrooms in the top slot. The lamp turns green and the GUI shows **+250 FE/t**.
 2. Connect a Mekanism cable or machine. Energy flows out, and the GUI's *out* value rises to match.
-3. Place 3 touching generators, all fed. Each GUI shows **3 linked, 3 active**, **x1.44** and a total of about **173 FE/t** (on brown mushrooms; red ones run 1.25× higher).
+3. Place 3 touching generators, all fed. Each GUI shows **3 linked, 3 active**, **x1.44** and a total of about **864 FE/t** (on brown mushrooms; red ones run 1.25× higher).
 4. Hover the orange burn box. You should see one clean tooltip. With JEI installed, clicking it opens the fuel list.
 
 ### Huge mushrooms
@@ -58,7 +58,7 @@ Run `./gradlew runClient` and create a **creative, superflat** world with cheats
 |---|---|---|
 | W1 | Right-click generator A with the wrench | Action bar: *Selected generator at …*. A has a purple outline while you hold the wrench, and the wrench glints. Its tooltip shows the selected position. |
 | W2 | Right-click generator B, **20 blocks** away | Action bar: *Linked …*. Red and white particles run from A to B, with a chime. Both GUIs show *Manual, 1/8 links* and **2 linked**. The selection is cleared, and the wrench keeps glinting for about 2 seconds, then stops. |
-| W3 | Feed both A and B | Each produces **48 FE/t** (40 × 1.2): they scale as one network. |
+| W3 | Feed both A and B | Each produces **240 FE/t** (200 × 1.2): they scale as one network. |
 | W4 | Link A to B again | *These generators are already linked*. |
 | W5 | Select A, then right-click A again | *That generator is already selected…* |
 | W6 | Select A, right-click C **70 blocks** away | *Too far apart (maximum 64 blocks)*. |

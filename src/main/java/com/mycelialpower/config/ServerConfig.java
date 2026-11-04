@@ -119,7 +119,7 @@ public final class ServerConfig {
 
         b.comment("Energy generation, storage and output.").push("energy");
         BASE_GENERATION = b.comment("Base FE/t produced by one running generator before fuel and network multipliers.")
-                .defineInRange("baseGeneration", 40.0D, 0.0D, 1_000_000.0D);
+                .defineInRange("baseGeneration", 200.0D, 0.0D, 1_000_000.0D);
         MAX_ENERGY_STORAGE = b.comment("Internal energy buffer of each generator, in FE.")
                 .defineInRange("maxEnergyStorage", 100_000, 1, Integer.MAX_VALUE);
         OUTPUT_TRANSFER_RATE = b.comment("Maximum FE per tick each generator pushes to (or lets be pulled by) neighbouring blocks.")

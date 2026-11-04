@@ -23,9 +23,9 @@
 #Energy generation, storage and output.
 [energy]
 	#Base FE/t produced by one running generator before fuel and network multipliers.
-	# Default: 40.0
+	# Default: 200.0
 	# Range: 0.0 ~ 1000000.0
-	baseGeneration = 40.0
+	baseGeneration = 200.0
 	#Internal energy buffer of each generator, in FE.
 	# Default: 100000
 	# Range: 1 ~ 2147483647

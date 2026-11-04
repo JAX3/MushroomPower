@@ -19,16 +19,16 @@ Mycelial Power adds the **Mycelial Generator**: an industrial fungal reactor tha
 ### 🍄 Exponential networks
 Generators touching on **any of their six faces** automatically form a network. Every running generator boosts all the others:
 
-> **Network FE/t = 40 × N × 1.2^(N − 1)**
+> **Network FE/t = 200 × N × 1.2^(N − 1)**
 
 | Running generators | Total FE/t |
 |---|---|
-| 1 | 40 |
-| 2 | 96 |
-| 3 | 173 |
-| 4 | 276 |
-| 5 | 415 |
-| 10 | 2,064 |
+| 1 | 200 |
+| 2 | 480 |
+| 3 | 864 |
+| 4 | 1,382 |
+| 5 | 2,074 |
+| 10 | 10,320 |
 
 - Only generators that are actually running count, so keep them all fed.
 - Networks update instantly as you place or break generators.
@@ -57,8 +57,8 @@ While it runs, a generator tries every few seconds to turn a nearby dirt block i
 
 | Fuel | Burn time | Energy | FE/t (single generator) | FE per item |
 |---|---|---|---|---|
-| Brown Mushroom | 20 s | ×1.0 | 40 | 16,000 |
-| Red Mushroom | 30 s | ×1.25 | 50 | 30,000 |
+| Brown Mushroom | 20 s | ×1.0 | 200 | 80,000 |
+| Red Mushroom | 30 s | ×1.25 | 250 | 150,000 |
 
 Add mushrooms from other mods with one config line, no code needed:
 

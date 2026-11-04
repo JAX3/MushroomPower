@@ -4,7 +4,7 @@ A NeoForge mod for **Minecraft 1.21.1** (Java 21) that adds one machine: the **M
 
 * Burns **mushrooms** and **water** to produce **Forge Energy (FE)**.
 * Generators touching on any of their six faces form a **network** whose output grows **exponentially**:
-  `Network FE/t = 40 × N × 1.2^(N − 1)` by default (1 → 40, 2 → 96, 3 → 173, 5 → 415, 10 → 2,064 FE/t).
+  `Network FE/t = 200 × N × 1.2^(N − 1)` by default (1 → 200, 2 → 480, 3 → 864, 5 → 2,074, 10 → 10,320 FE/t).
 * While running, it slowly turns nearby **dirt into mycelium**. Each failed attempt **raises the chance** until a conversion is guaranteed.
 * Every number lives in a **server TOML config**, including mushroom fuels from other mods.
 * The **Mycelium Wrench** links generators that are not touching, so they share the same exponential boost.
@@ -46,8 +46,8 @@ The generator is mined with any pickaxe and drops itself. Its inventory is dropp
 
 | Fuel (default) | Burn time | Energy | FE/t alone | FE per item |
 |---|---|---|---|---|
-| Brown Mushroom | 400 ticks (20 s) | ×1.0 | 40 | 16,000 |
-| Red Mushroom | 600 ticks (30 s) | ×1.25 | 50 | 30,000 |
+| Brown Mushroom | 400 ticks (20 s) | ×1.0 | 200 | 80,000 |
+| Red Mushroom | 600 ticks (30 s) | ×1.25 | 250 | 150,000 |
 
 A generator stops when it runs out of fuel or water. When its buffer is full it pauses and keeps its fuel progress (configurable).
 
