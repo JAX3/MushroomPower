@@ -50,7 +50,9 @@ Review the output (`--preview` helps), then either copy the files you want into 
 python generate.py -o ../../src/main/resources --only textures
 ```
 
-With the default seed (`1337`) the tool reproduces the files that ship with the mod byte for byte, so re-running it on unchanged code is harmless.
+With the default seed (`1337`), the tool reproduces the generated files that ship with the mod.
+
+> **Hand-edited textures:** `textures/item/mycelium_wrench.png` in the mod has been replaced by a hand-made version, so it no longer matches `items.py`. Writing the tool's output straight into the mod (`-o ../../src/main/resources` without `--only`) would overwrite it. Write to `output/` and copy only the files you want, or use `--only models` / `--only structure`.
 
 `--clean` refuses to delete anything except the default `output/` folder.
 
@@ -59,7 +61,7 @@ With the default seed (`1337`) the tool reproduces the files that ship with the 
 | Module | Contents |
 |---|---|
 | `mycelial_textures/palette.py` | Colour helpers, shared colours, the seeded random source |
-| `mycelial_textures/blocks.py` | 16×16 block textures and the 8-frame animated chamber |
+| `mycelial_textures/blocks.py` | 16×16 block textures, and the front chamber's red mushroom (dim when idle, glowing 8-frame pulse when running) |
 | `mycelial_textures/gui.py` | Machine GUI (256×256), JEI background, logo |
 | `mycelial_textures/items.py` | Hand-placed item icons (Mycelium Wrench), editable as a character grid |
 | `mycelial_textures/models.py` | Block/item models (with mushroom and fungus elements) and the blockstate |

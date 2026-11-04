@@ -92,37 +92,85 @@ def front_texture():
     return img
 
 
+# Red mushroom shown in the front energy chamber. The model only shows texture pixels 3..12 on both axes,
+# so the mushroom is drawn in that 10x10 window. Keys: R cap, r cap edge/shadow, W spot, U cap underside,
+# S stem, s stem shadow.
+CHAMBER_MUSHROOM = [
+    "...rRRr...",
+    ".rRRWRRRr.",
+    "rRWWRRRWRr",
+    "RRWRRRRRRR",
+    "RRRRRWRRRR",
+    "rRRRRRRRRr",
+    ".UUUSSUUU.",
+    "....SS....",
+    "....Ss....",
+    "...sSSs...",
+]
+CHAMBER_ORIGIN = 3
+
+MUSHROOM_IDLE = {
+    "R": hexc("#7a2a2a"), "r": hexc("#561d22"), "W": hexc("#9a8e8a"),
+    "U": hexc("#3a2228"), "S": hexc("#8a8072"), "s": hexc("#655c55"),
+}
+
+
+def _draw_mushroom(px, palette, y_offset=0):
+    for y, row in enumerate(CHAMBER_MUSHROOM):
+        for x, key in enumerate(row):
+            if key != ".":
+                px[CHAMBER_ORIGIN + x, CHAMBER_ORIGIN + y + y_offset] = palette[key]
+
+
 def chamber_off():
+    """Idle window: dark glass with an unlit red mushroom behind it."""
     img = Image.new("RGBA", (16, 16))
     px = img.load()
+    # Background noise first: it keeps the seeded random sequence (and every later texture) unchanged.
     for y in range(16):
         for x in range(16):
-            px[x, y] = shade(PURPLE_DARK, rng.randint(-5, 5))
+            px[x, y] = shade(hexc("#1c1418"), rng.randint(-5, 5))
     for i in range(16):
         px[i, 0] = px[0, i] = hexc("#4a3a5e")
         px[i, 15] = px[15, i] = hexc("#140c1e")
-    for i in range(3, 8):  # glass reflection
-        px[i, 11 - i] = hexc("#4d3d66")
+    _draw_mushroom(px, MUSHROOM_IDLE)
+    for i in range(4, 7):  # glass reflection across the top-left of the window
+        px[i, 9 - i] = hexc("#5a4a58")
     return img
 
 
 def chamber_on(frames=8):
+    """Running window: the red mushroom glows and pulses, with a warm halo behind it (rendered full-bright)."""
     img = Image.new("RGBA", (16, 16 * frames))
     px = img.load()
-    c1, c2, c3 = hexc("#5a22c9"), hexc("#3d7bff"), hexc("#e0c2ff")
+    halo_dark, halo_bright = hexc("#2a0c12"), hexc("#b8324a")
     for f in range(frames):
-        phase = f / frames * 2 * math.pi
+        pulse = 0.5 + 0.5 * math.sin(f / frames * 2 * math.pi)  # 0..1
+        top = f * 16
         for y in range(16):
             for x in range(16):
-                cx, cy = x - 7.5, y - 7.5
-                r = math.hypot(cx, cy)
-                a = math.atan2(cy, cx)
-                v = 0.5 + 0.5 * math.sin(r * 0.9 - phase * 2 + a * 2)
-                core = max(0.0, 1.0 - r / 6.0)
-                col = lerp(c1, c2, v)
-                col = lerp(col, c3, min(1.0, core * 0.9 + 0.1 * math.sin(phase + r)))
-                px[x, y + f * 16] = col
+                # Halo centred on the cap
+                r = math.hypot(x - 7.5, y - 6.5)
+                glow = max(0.0, 1.0 - r / (6.0 + 1.5 * pulse))
+                px[x, top + y] = lerp(halo_dark, halo_bright, glow * (0.55 + 0.35 * pulse))
+        palette = {
+            "R": lerp(hexc("#e8323a"), hexc("#ff6a5a"), pulse),
+            "r": lerp(hexc("#b01e2c"), hexc("#e0404a"), pulse),
+            "W": lerp(hexc("#ffe8e0"), hexc("#ffffff"), pulse),
+            "U": lerp(hexc("#7a2030"), hexc("#a0384a"), pulse),
+            "S": lerp(hexc("#f0e2c8"), hexc("#fff4dc"), pulse),
+            "s": lerp(hexc("#c8b496"), hexc("#e8d6b8"), pulse),
+        }
+        for y, row in enumerate(CHAMBER_MUSHROOM):
+            for x, key in enumerate(row):
+                if key != ".":
+                    px[CHAMBER_ORIGIN + x, top + CHAMBER_ORIGIN + y] = palette[key]
+        # Spores drifting up from the cap
+        for i, (sx, sy) in enumerate([(4, 2), (11, 3), (7, 1), (12, 1)]):
+            yy = (sy - f + i * 2) % 4
+            if (f + i) % 2 == 0:
+                px[sx, top + yy] = lerp(hexc("#ffb0c0"), hexc("#ffffff"), pulse)
         for i in range(16):
-            px[i, f * 16] = px[0, f * 16 + i] = hexc("#6f54a0")
-            px[i, f * 16 + 15] = px[15, f * 16 + i] = hexc("#2a1840")
+            px[i, top] = px[0, top + i] = hexc("#8a3a4a")
+            px[i, top + 15] = px[15, top + i] = hexc("#3a1018")
     return img
