@@ -11,6 +11,12 @@ group = mod_group_id
 repositories {
     mavenLocal()
     maven {
+        // DevAuth: Microsoft account sign-in for the dev client (dev runs only)
+        name = 'DevAuth'
+        url = 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1'
+        content { includeGroup 'me.djtheredstoner' }
+    }
+    maven {
         // JEI
         name = 'BlameJared'
         url = 'https://maven.blamejared.com/'
@@ -45,9 +51,12 @@ neoForge {
         client {
             client()
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-            // Player name in the dev client (set dev_username in gradle.properties). Offline only: this sets the
-            // name, not a login, so it does not use your account's password, skin or Microsoft sign-in.
-            if (project.hasProperty('dev_username') && !project.dev_username.toString().isBlank()) {
+            if (project.use_devauth.toBoolean()) {
+                // DevAuth signs the dev client in to your real Microsoft account (your name and skin).
+                // First launch opens a browser sign-in; tokens are stored on your computer, never in the project.
+                systemProperty 'devauth.enabled', 'true'
+            } else if (project.hasProperty('dev_username') && !project.dev_username.toString().isBlank()) {
+                // Offline name only (no login, default skin).
                 programArguments.addAll '--username', project.dev_username.toString()
             }
         }
@@ -94,6 +103,11 @@ dependencies {
         runtimeOnly "mekanism:Mekanism:${mekanism_version}:additions"    // Mekanism: Additions
         runtimeOnly "mekanism:Mekanism:${mekanism_version}:generators"   // Mekanism: Generators
         runtimeOnly "mekanism:Mekanism:${mekanism_version}:tools"        // Mekanism: Tools
+    }
+
+    if (project.use_devauth.toBoolean()) {
+        // DevAuth (https://github.com/DJtheRedstoner/DevAuth) in the dev runs only. Not bundled into the mod jar.
+        runtimeOnly "me.djtheredstoner:DevAuth-neoforge:${devauth_version}"
     }
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
