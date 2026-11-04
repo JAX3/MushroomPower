@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 
-from . import blocks, gui, items, models, palette, structure
+from . import blocks, blocks_realistic, gui, items, models, palette, structure
 
 MOD_ID = "mycelialpower"
 DEFAULT_OUTPUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "output")
@@ -28,24 +28,34 @@ def save_json(obj, root, *parts):
     return path
 
 
-def generate_textures(out):
+def generate_textures(out, style="cartoon"):
     """Generates every texture. The call order is fixed so a given seed is reproducible."""
     assets = os.path.join(out, "assets", MOD_ID)
+    if style == "realistic":
+        block_set = blocks_realistic
+        block_images = None
+    else:
+        block_set = blocks
+        # The realistic textures are still drawn (and discarded) because they consume the seeded random
+        # sequence; this keeps the GUI, JEI background and logo identical whichever style is chosen.
+        block_images = [blocks_realistic.side_texture(), blocks_realistic.top_texture(), blocks_realistic.bottom_texture(),
+                        blocks_realistic.front_texture(), blocks_realistic.chamber_off(), blocks_realistic.chamber_on()]
     written = [
-        save_png(blocks.side_texture(), assets, "textures", "block", "generator_side.png"),
-        save_png(blocks.top_texture(), assets, "textures", "block", "generator_top.png"),
-        save_png(blocks.bottom_texture(), assets, "textures", "block", "generator_bottom.png"),
-        save_png(blocks.front_texture(), assets, "textures", "block", "generator_front.png"),
-        save_png(blocks.chamber_off(), assets, "textures", "block", "generator_chamber_off.png"),
-        save_png(blocks.chamber_on(), assets, "textures", "block", "generator_chamber_on.png"),
+        save_png(block_set.side_texture(), assets, "textures", "block", "generator_side.png"),
+        save_png(block_set.top_texture(), assets, "textures", "block", "generator_top.png"),
+        save_png(block_set.bottom_texture(), assets, "textures", "block", "generator_bottom.png"),
+        save_png(block_set.front_texture(), assets, "textures", "block", "generator_front.png"),
+        save_png(block_set.chamber_off(), assets, "textures", "block", "generator_chamber_off.png"),
+        save_png(block_set.chamber_on(), assets, "textures", "block", "generator_chamber_on.png"),
         save_json({"animation": {"frametime": 3, "interpolate": True}},
                   assets, "textures", "block", "generator_chamber_on.png.mcmeta"),
         save_png(gui.gui_texture(), assets, "textures", "gui", "mycelial_generator.png"),
         save_png(gui.jei_texture(), assets, "textures", "gui", "jei_mycelial_generator.png"),
         save_png(gui.logo(), out, "logo.png"),
         # New textures go after the existing ones so the seeded random order (and their bytes) stay the same.
-        save_png(items.mycelium_wrench(), assets, "textures", "item", "mycelium_wrench.png"),
+        save_png(items.mycelium_wrench(style), assets, "textures", "item", "mycelium_wrench.png"),
     ]
+    del block_images
     return written
 
 
@@ -111,6 +121,8 @@ def parse_args(argv):
                         help="Generate only this group (repeatable). Default: all groups.")
     parser.add_argument("--seed", type=int, default=1337,
                         help="Random seed. 1337 reproduces the textures shipped with the mod. Default: %(default)s")
+    parser.add_argument("--style", choices=("cartoon", "realistic"), default="cartoon",
+                        help="Art style for the block and wrench textures. Default: %(default)s")
     parser.add_argument("--preview", action="store_true", help="Also write enlarged previews to <output>/preview/.")
     parser.add_argument("--clean", action="store_true",
                         help="Delete the output folder first. Refused unless it is the default folder.")
@@ -132,7 +144,7 @@ def main(argv=None):
     groups = args.only or list(GROUPS)
     written = []
     if "textures" in groups:
-        written += generate_textures(out)
+        written += generate_textures(out, args.style)
     if "models" in groups:
         written += generate_models(out)
     if "structure" in groups:
