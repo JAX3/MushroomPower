@@ -45,6 +45,11 @@ neoForge {
         client {
             client()
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            // Player name in the dev client (set dev_username in gradle.properties). Offline only: this sets the
+            // name, not a login, so it does not use your account's password, skin or Microsoft sign-in.
+            if (project.hasProperty('dev_username') && !project.dev_username.toString().isBlank()) {
+                programArguments.addAll '--username', project.dev_username.toString()
+            }
         }
 
         server {
