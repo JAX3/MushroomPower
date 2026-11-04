@@ -111,8 +111,6 @@ Requires JDK 21. Gradle 8.14.3 is downloaded by the wrapper.
 ./gradlew test                 # unit tests for the formulas and parsers only
 ```
 
-**Your own account in the dev client:** [DevAuth](https://github.com/DJtheRedstoner/DevAuth) is set up, so `runClient` plays as your real Microsoft account, with your name and skin. On the first launch, the game log prints a link and code: open the link, sign in to Microsoft, and the game continues. DevAuth stores its login tokens in a `.devauth` folder in your user directory, never in this project. To play offline instead, set `use_devauth=false` (and optionally `dev_username=YourName`) in `gradle.properties`.
-
 To launch the dev runs **without JEI**, set `use_jei_runtime=false` in `gradle.properties` (or pass `-Puse_jei_runtime=false`).
 
 The build downloads from `maven.neoforged.net` (NeoForge, ModDevGradle tooling), Mojang's servers (Minecraft) and `maven.blamejared.com` (JEI).
