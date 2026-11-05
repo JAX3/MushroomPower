@@ -43,10 +43,8 @@ def generator_model(active):
         # Brown mushroom on the roof
         box([11, 16, 10], [12, 18, 11], "#stem", [7, 7, 8, 9]),
         box([9.5, 18, 8.5], [13.5, 19.5, 12.5], "#cap_brown", [4, 4, 8, 8]),
-        # Bracket fungi on the casing sides
-        box([16, 4, 9], [17, 5, 14], "#cap_brown", [4, 4, 9, 5]),
-        box([-1, 10, 2], [0, 11, 6], "#cap_red", [4, 4, 8, 5]),
-        box([5, 2, 16], [9, 3, 17], "#cap_brown", [3, 3, 7, 4]),
+
+
     ]
     model = {
         "parent": "minecraft:block/block",

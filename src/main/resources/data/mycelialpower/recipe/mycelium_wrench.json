@@ -8,17 +8,17 @@
     "I": {
       "item": "minecraft:iron_ingot"
     },
+    "S": {
+      "item": "minecraft:stick"
+    },
     "R": {
       "item": "minecraft:red_mushroom"
-    },
-    "X": {
-      "item": "minecraft:redstone"
     }
   },
   "pattern": [
-    " IA",
-    " XI",
-    "R  "
+    " I ",
+    "RAI",
+    "S  "
   ],
   "result": {
     "count": 1,
