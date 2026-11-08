@@ -562,12 +562,24 @@ public class MycelialGeneratorBlockEntity extends BlockEntity implements MenuPro
 
     // ------------------------------------------------------------------ block state
 
+    /**
+     * The front glow (the block state's ACTIVE/LIGHT) stays on while the generator is running AND while it is
+     * only paused because its energy buffer is full. Otherwise a full buffer that is being drained by a cable
+     * toggles between running and paused every few ticks, which made the glow (and the block light) flicker.
+     * The glow only turns off when the generator really stops: no fuel or no water.
+     */
     private void updateBlockState(ServerLevel level, BlockState blockState) {
-        int light = active ? ServerConfig.get(ServerConfig.ACTIVE_LIGHT_LEVEL) : 0;
-        if (blockState.getValue(MycelialGeneratorBlock.ACTIVE) != active || blockState.getValue(MycelialGeneratorBlock.LIGHT) != light) {
-            level.setBlock(worldPosition, blockState.setValue(MycelialGeneratorBlock.ACTIVE, active)
+        boolean lit = isLit();
+        int light = lit ? ServerConfig.get(ServerConfig.ACTIVE_LIGHT_LEVEL) : 0;
+        if (blockState.getValue(MycelialGeneratorBlock.ACTIVE) != lit || blockState.getValue(MycelialGeneratorBlock.LIGHT) != light) {
+            level.setBlock(worldPosition, blockState.setValue(MycelialGeneratorBlock.ACTIVE, lit)
                     .setValue(MycelialGeneratorBlock.LIGHT, light), Block.UPDATE_CLIENTS);
         }
+    }
+
+    /** Whether the front window glows: running, or fuelled and paused only by a full energy buffer. */
+    public boolean isLit() {
+        return state == GeneratorState.RUNNING || state == GeneratorState.ENERGY_FULL;
     }
 
     // ------------------------------------------------------------------ GUI status

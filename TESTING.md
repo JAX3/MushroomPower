@@ -44,7 +44,8 @@ Run `./gradlew runClient` and create a **creative, superflat** world with cheats
 1. Place a generator, right-click it with a water bucket, and put red mushrooms in the top slot. The lamp turns green and the GUI shows **+250 FE/t**.
 2. Connect a Mekanism cable or machine. Energy flows out, and the GUI's *out* value rises to match.
 3. Place 3 touching generators, all fed. Each GUI shows **3 linked, 3 active**, **x1.44** and a total of about **864 FE/t** (on brown mushrooms; red ones run 1.25× higher).
-4. Hover the orange burn box. You should see one clean tooltip. With JEI installed, clicking it opens the fuel list.
+4. Fill a generator's energy buffer (no cable attached), then connect a slow consumer. The front window and light stay on steadily, with no flicker, while the lamp switches between green (running) and yellow (energy full). The glow only goes out with no fuel or no water.
+5. Hover the orange burn box. You should see one clean tooltip. With JEI installed, clicking it opens the fuel list.
 
 ### Huge mushrooms
 1. Set `hugeMushroomChance = 1.0` in the server config (it applies while the world runs).
