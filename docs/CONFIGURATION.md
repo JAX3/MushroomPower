@@ -100,8 +100,8 @@ Defaults:
 
 ```toml
 fuels = [
-  "minecraft:brown_mushroom;burn=400;energy=1.0;water=1.0;mycelium=1.0;scaling=0.0",
-  "minecraft:red_mushroom;burn=600;energy=1.25;water=1.0;mycelium=1.0;scaling=0.0"
+  "minecraft:brown_mushroom;burn=200;energy=1.0;water=1.0;mycelium=1.0;scaling=0.0",
+  "minecraft:red_mushroom;burn=100;energy=1.25;water=1.0;mycelium=1.0;scaling=0.0"
 ]
 ```
 
@@ -109,8 +109,8 @@ Fuels from other mods need no code. For example:
 
 ```toml
 fuels = [
-  "minecraft:brown_mushroom;burn=400",
-  "minecraft:red_mushroom;burn=600;energy=1.25",
+  "minecraft:brown_mushroom;burn=200",
+  "minecraft:red_mushroom;burn=100;energy=1.25",
   "minecraft:crimson_fungus;burn=800;energy=1.5;water=2.0",
   "minecraft:warped_fungus;burn=800;energy=1.5;mycelium=2.0",
   "#c:mushrooms;burn=400",

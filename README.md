@@ -49,8 +49,8 @@ The generator is mined with any pickaxe and drops itself. Its inventory is dropp
 
 | Fuel (default) | Burn time | Energy | FE/t alone | FE per item |
 |---|---|---|---|---|
-| Brown Mushroom | 400 ticks (20 s) | ×1.0 | 200 | 80,000 |
-| Red Mushroom | 600 ticks (30 s) | ×1.25 | 250 | 150,000 |
+| Brown Mushroom | 200 ticks (10 s) | ×1.0 | 200 | 40,000 |
+| Red Mushroom | 100 ticks (5 s) | ×1.25 | 250 | 25,000 |
 
 A generator stops when it runs out of fuel or water. When its buffer is full it pauses and keeps its fuel progress (configurable).
 
@@ -108,7 +108,7 @@ Adding a modded fuel takes one line:
 
 ```toml
 [fuel]
-	fuels = ["minecraft:brown_mushroom;burn=400", "minecraft:red_mushroom;burn=600;energy=1.25", "#c:mushrooms;burn=400"]
+	fuels = ["minecraft:brown_mushroom;burn=200", "minecraft:red_mushroom;burn=100;energy=1.25", "#c:mushrooms;burn=200"]
 ```
 
 ---

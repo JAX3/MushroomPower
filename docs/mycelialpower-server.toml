@@ -112,7 +112,7 @@
 #Exact item entries take priority over tag entries. Example for another mod: "#c:mushrooms;burn=400"
 [fuel]
 	#Accepted mushroom fuels.
-	fuels = ["minecraft:brown_mushroom;burn=400;energy=1.0;water=1.0;mycelium=1.0;scaling=0.0", "minecraft:red_mushroom;burn=600;energy=1.25;water=1.0;mycelium=1.0;scaling=0.0"]
+	fuels = ["minecraft:brown_mushroom;burn=200;energy=1.0;water=1.0;mycelium=1.0;scaling=0.0", "minecraft:red_mushroom;burn=100;energy=1.25;water=1.0;mycelium=1.0;scaling=0.0"]
 
 #Water tank and consumption.
 [water]
