@@ -192,8 +192,8 @@ public final class ServerConfig {
         FUELS = b.comment("Accepted mushroom fuels.")
                 .defineListAllowEmpty("fuels",
                         List.of(
-                                "minecraft:brown_mushroom;burn=400;energy=1.0;water=1.0;mycelium=1.0;scaling=0.0",
-                                "minecraft:red_mushroom;burn=600;energy=1.25;water=1.0;mycelium=1.0;scaling=0.0"),
+                                "minecraft:brown_mushroom;burn=100;energy=1.0;water=1.0;mycelium=1.0;scaling=0.0",
+                                "minecraft:red_mushroom;burn=200;energy=1.25;water=1.0;mycelium=1.0;scaling=0.0"),
                         () -> "minecraft:brown_mushroom;burn=400",
                         FuelEntryParser::isValid);
         b.pop();
