@@ -122,8 +122,11 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
             // PASS skips this block's GUI and lets the wrench's own useOn handle the click.
             return InteractionResult.PASS;
         }
+        // Hands the generator's own (side-agnostic) tank to FluidUtil; the overload that looks the handler up by
+        // position is deprecated for removal in newer NeoForge 26.1.2 builds.
         if (ServerConfig.get(ServerConfig.ALLOW_BUCKET_INTERACTION)
-                && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hitResult.getDirection())) {
+                && level.getBlockEntity(pos) instanceof MycelialGeneratorBlockEntity generator
+                && FluidUtil.interactWithFluidHandler(player, hand, pos, generator.getExternalFluidHandler())) {
             return InteractionResult.SUCCESS;
         }
         // Not a fluid container (or nothing to fill): fall through to useWithoutItem, which opens the GUI.

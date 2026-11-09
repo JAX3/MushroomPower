@@ -117,7 +117,7 @@ public class MycelialPowerJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalysts(MycelialGeneratorCategory.TYPE, ModItems.MYCELIAL_GENERATOR.get());
+        registration.addCraftingStation(MycelialGeneratorCategory.TYPE, ModItems.MYCELIAL_GENERATOR.get());
     }
 
     @Override
