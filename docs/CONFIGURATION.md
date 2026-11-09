@@ -4,7 +4,7 @@ Mycelial Power uses two NeoForge TOML files.
 
 | File | Type | Location | Contents |
 |---|---|---|---|
-| `mycelialpower-server.toml` | **server** | `<world>/serverconfig/` | All gameplay and balancing values. Synced to every client on join, so the GUI and JEI always show the server's numbers. |
+| `mycelialpower-synced.toml` | **synced** | `config/` (a copy in `<world>/syncedconfig/` overrides it for that world) | All gameplay and balancing values. Synced to every client on join, so the GUI and JEI always show the server's numbers. |
 | `mycelialpower-client.toml` | client | `<instance>/config/` | Cosmetic effects only (particles, sound). |
 
 To give every new world custom defaults, copy a finished `mycelialpower-server.toml` to `<instance>/defaultconfigs/`. A copy of the defaults is in [`mycelialpower-server.toml`](mycelialpower-server.toml).
