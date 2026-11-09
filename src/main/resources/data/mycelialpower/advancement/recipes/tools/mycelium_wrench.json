@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "mycelialpower:mycelium_wrench"
+        "recipes": "mycelialpower:mycelium_wrench"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

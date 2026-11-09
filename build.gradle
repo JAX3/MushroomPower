@@ -14,7 +14,10 @@ repositories {
         // JEI
         name = 'BlameJared'
         url = 'https://maven.blamejared.com/'
-        content { includeGroup 'mezz.jei' }
+        content {
+            includeGroup 'mezz.jei'
+            includeGroup 'net.mezzdev.config' // JEI 31+ runtime dependency
+        }
     }
     maven {
         // JEI mirror

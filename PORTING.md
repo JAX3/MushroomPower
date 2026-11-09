@@ -1,3 +1,32 @@
+# Port to Minecraft 26.3 / NeoForge 26.3
+
+Branch `port/minecraft-26.3` builds on the 26.1.2 port below, updated for **Minecraft 26.3** and **NeoForge 26.3.0.101**.
+
+> **Status: builds and runs.**
+> - `./gradlew build` succeeds.
+> - `./gradlew runGameTestServer` passes all 15 Mycelial Power GameTests, plus 1 from JEI.
+> - A real 26.3 client loaded the mod together with Resourceful Sheep and JEI 31.17 with no errors.
+
+## Versions
+
+| | 26.1.2 branch | This branch |
+|---|---|---|
+| Minecraft | 26.1.2 | **26.3** |
+| NeoForge | 26.1.2.126 | **26.3.0.101** |
+| JEI | 29.37.0.100 | **31.17.0.109** (any 31.x) |
+| Java / Gradle / ModDevGradle | 25 / 9.2.1 / 2.0.148 | unchanged |
+
+## What changed (26.1.2 → 26.3)
+- **Config:** `ModConfig.Type.SERVER` was renamed `SYNCED`, so the per-world config now lives in `<world>/syncedconfig/`.
+- **Mushroom growth:** `ConfiguredFeature<?, ?>` and `Registries.CONFIGURED_FEATURE` became `Feature` and `Registries.FEATURE`. This matches vanilla's `MushroomBlock#growMushroom`.
+- **Block codecs:** blocks no longer declare a codec, so `CODEC` and `codec()` were removed from `MycelialGeneratorBlock`.
+- **Push reaction:** `PushReaction.BLOCK` was renamed `IMMOVEABLE`.
+- **Bucket interaction:** `FluidUtil.interactWithFluidHandler(player, hand, pos, handler)` now takes an extra transaction argument. Passing `null` opens its own transaction.
+- **Recipe advancements:** the `minecraft:recipe_unlocked` condition key `recipe` became `recipes`. The old key stopped the world from loading, which the GameTests caught.
+- **Loot table format:** 26.3 renamed pool `conditions` (a list) to `condition` (a single object with `type`), and `functions` to `modifier`. The old keys are silently ignored rather than rejected, so the "survives explosion" rule was being dropped. The table was rewritten in the 26.3 format.
+- **Build:** JEI 31's runtime needs `net.mezzdev.config` from the BlameJared maven, which was added to the repository filter.
+- **Mod icon:** the deprecated `logoFile` was replaced with `iconFile` (plus `iconBlur=false`), so the logo appears as the mod-list icon.
+
 # Port to Minecraft 26.1.2 / NeoForge 26.1.2
 
 This branch (`port/minecraft-26.1.2`) is the Mycelial Power 1.21.1 mod ported to **Minecraft 26.1.2** with **NeoForge 26.1.2.126**. The 1.21.1 version stays on `claude/mycelial-power-generator-wipojt`.

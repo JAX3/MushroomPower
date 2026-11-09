@@ -19,7 +19,7 @@ public final class ModBlocks {
                     .strength(3.5F, 6.0F)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.NETHERITE_BLOCK)
-                    .pushReaction(PushReaction.BLOCK)
+                    .pushReaction(PushReaction.IMMOVEABLE)
                     .lightLevel(state -> state.getValue(MycelialGeneratorBlock.LIGHT)));
 
     private ModBlocks() {

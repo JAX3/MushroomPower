@@ -1,6 +1,5 @@
 package com.mycelialpower.block;
 
-import com.mojang.serialization.MapCodec;
 import com.mycelialpower.blockentity.MycelialGeneratorBlockEntity;
 import com.mycelialpower.config.ClientConfig;
 import com.mycelialpower.config.ServerConfig;
@@ -44,7 +43,6 @@ import org.jetbrains.annotations.Nullable;
  * properties of this single block.
  */
 public class MycelialGeneratorBlock extends BaseEntityBlock {
-    public static final MapCodec<MycelialGeneratorBlock> CODEC = simpleCodec(MycelialGeneratorBlock::new);
 
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
@@ -62,10 +60,6 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
                 .setValue(LIGHT, 0));
     }
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -126,7 +120,7 @@ public class MycelialGeneratorBlock extends BaseEntityBlock {
         // position is deprecated for removal in newer NeoForge 26.1.2 builds.
         if (ServerConfig.get(ServerConfig.ALLOW_BUCKET_INTERACTION)
                 && level.getBlockEntity(pos) instanceof MycelialGeneratorBlockEntity generator
-                && FluidUtil.interactWithFluidHandler(player, hand, pos, generator.getExternalFluidHandler())) {
+                && FluidUtil.interactWithFluidHandler(player, hand, pos, generator.getExternalFluidHandler(), null)) {
             return InteractionResult.SUCCESS;
         }
         // Not a fluid container (or nothing to fill): fall through to useWithoutItem, which opens the GUI.

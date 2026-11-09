@@ -37,7 +37,7 @@ public final class MycelialPower {
         ModDataComponents.COMPONENTS.register(modBus);
         ModGameTests.register(modBus);
 
-        container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
+        container.registerConfig(ModConfig.Type.SYNCED, ServerConfig.SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
 
         modBus.addListener(ModCapabilities::register);

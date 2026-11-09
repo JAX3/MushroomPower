@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "mycelialpower:mycelial_generator"
+        "recipes": "mycelialpower:mycelial_generator"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

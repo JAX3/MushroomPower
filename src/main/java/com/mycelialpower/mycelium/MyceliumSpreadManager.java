@@ -17,7 +17,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -141,14 +141,14 @@ public final class MyceliumSpreadManager {
             return false;
         }
         boolean red = random.nextDouble() < ServerConfig.get(ServerConfig.HUGE_MUSHROOM_RED_RATIO);
-        ResourceKey<ConfiguredFeature<?, ?>> key = red ? TreeFeatures.HUGE_RED_MUSHROOM : TreeFeatures.HUGE_BROWN_MUSHROOM;
-        Optional<Holder.Reference<ConfiguredFeature<?, ?>>> feature =
-                level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(key);
+        ResourceKey<Feature> key = red ? TreeFeatures.HUGE_RED_MUSHROOM : TreeFeatures.HUGE_BROWN_MUSHROOM;
+        Optional<Holder.Reference<Feature>> feature =
+                level.registryAccess().lookupOrThrow(Registries.FEATURE).get(key);
         if (feature.isEmpty()) {
             return false;
         }
         BlockGrowFeatureEvent event = EventHooks.fireBlockGrowFeature(level, random, stem, feature.get());
-        Holder<ConfiguredFeature<?, ?>> chosen = event.getFeature();
+        Holder<Feature> chosen = event.getFeature();
         if (event.isCanceled() || chosen == null) {
             return false;
         }
