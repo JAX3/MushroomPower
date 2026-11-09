@@ -20,6 +20,12 @@ repositories {
         }
     }
     maven {
+        // Jade (optional integration)
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    maven {
         // JEI mirror
         name = 'ModMaven'
         url = 'https://modmaven.dev/'
@@ -88,6 +94,10 @@ dependencies {
         localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
     }
 
+    // Jade: no separate API jar, so compile against the mod; dev runs only, never bundled or published.
+    compileOnly "maven.modrinth:jade:${jade_version}"
+    localRuntime "maven.modrinth:jade:${jade_version}"
+
     // Gradle 9 needs the JUnit platform launcher declared explicitly; the BOM keeps all JUnit versions aligned.
     testImplementation platform('org.junit:junit-bom:5.13.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -107,6 +117,7 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
             neo_version_range      : neo_version_range,
             loader_version_range   : loader_version_range,
             jei_version_range      : jei_version_range,
+            jade_version_range     : jade_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
             mod_license            : mod_license,

@@ -1,8 +1,8 @@
 # Mycelial Power
 
-A NeoForge mod for **Minecraft 26.1.2** (Java 25) that adds the **Mycelial Generator**.
+A NeoForge mod for **Minecraft 26.3** (Java 25) that adds the **Mycelial Generator**.
 
-> **This is the `port/minecraft-26.1.2` branch.** It is a port of the 1.21.1 version that builds, runs and passes all 15 GameTests. See **[PORTING.md](PORTING.md)** for what changed and what still needs testing. The 1.21.1 version lives on the `claude/mycelial-power-generator-wipojt` branch.
+> **This is `main`, the Minecraft 26.3 version.** It builds, runs and passes all 15 GameTests. See **[PORTING.md](PORTING.md)** for what changed. The 1.21.1 version lives on the `claude/mycelial-power-generator-wipojt` branch.
 
 * Burns **mushrooms** and **water** to produce **Forge Energy (FE)**.
 * Generators touching on any of their six faces form a **network** whose output grows **exponentially**:
@@ -14,18 +14,19 @@ A NeoForge mod for **Minecraft 26.1.2** (Java 25) that adds the **Mycelial Gener
 
 | | |
 |---|---|
-| Minecraft | 26.1.2 |
-| NeoForge | 26.1.2.x (built against 26.1.2.126) |
-| Java | 21 |
-| JEI (optional) | 29.x for 26.1.2 (built against 29.37.0.100) |
+| Minecraft | 26.3 |
+| NeoForge | 26.3.x (built against 26.3.0.101) |
+| Java | 25 |
+| JEI (optional) | 31.x for 26.3 (built against 31.17.0.109) |
+| Jade (optional) | 26.3.x for NeoForge (built against 26.3.5) |
 
 ---
 
 ## Installation (players and servers)
 
-1. Install NeoForge 26.1.2.x for Minecraft 26.1.2.
-2. Put `mycelialpower-1.1.0.jar` in the `mods/` folder of the client **and** the server.
-3. Optional: install JEI for 26.1.2. The mod runs normally without it.
+1. Install NeoForge 26.3.x for Minecraft 26.3.
+2. Put `mycelialpower-2.0.0.jar` in the `mods/` folder of the client **and** the server.
+3. Optional: install JEI 31.x and/or Jade 26.3.x. The mod runs normally without them.
 
 ## Usage
 
@@ -88,9 +89,20 @@ Every 100 running ticks a generator tries to convert a dirt block with air above
 
 ---
 
+## Jade (optional)
+With [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) installed (26.3.x for NeoForge), looking at a Mycelial Generator shows:
+- **State** (Running, No fuel, No water, Energy full) and the **FE/t** it is generating.
+- The **mushroom burning** and how long it has left, with a fuel progress bar.
+- **Network** size, active generators and scaling, and the network's total FE/t when several generators are linked.
+- Stored **energy**, the **water tank** and the **fuel slots**. These come from Jade's built-in support for NeoForge's energy, fluid and item capabilities.
+
+![Jade on a Mycelial Generator](docs/screenshots/jade_generator.png)
+
+Each part can be switched off in Jade's settings under *Plugins → Mycelial Power*. Jade is optional: the mod runs fine without it.
+
 ## Configuration
 
-See **[TESTING.md](TESTING.md)** for the test plan and **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** for every option, and [docs/mycelialpower-server.toml](docs/mycelialpower-server.toml) for the default file. Edits to `<world>/serverconfig/mycelialpower-server.toml` apply while the server runs. JEI refreshes when you rejoin.
+See **[TESTING.md](TESTING.md)** for the test plan and **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** for every option, and [docs/mycelialpower-server.toml](docs/mycelialpower-server.toml) for the default file. The gameplay config is `config/mycelialpower-synced.toml`; a copy placed in `<world>/syncedconfig/` overrides it for that world only. Edits apply while the server runs. JEI refreshes when you rejoin.
 
 Adding a modded fuel takes one line:
 
