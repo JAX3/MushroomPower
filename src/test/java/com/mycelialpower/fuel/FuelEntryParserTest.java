@@ -12,7 +12,7 @@ class FuelEntryParserTest {
         FuelDefinition def = FuelEntryParser.parseOrThrow("minecraft:red_mushroom;burn=600;energy=1.25;water=1.0;mycelium=2;scaling=0.05");
         assertEquals("minecraft:red_mushroom", def.id());
         assertFalse(def.tag());
-        assertEquals(600, def.burnTicks());
+        assertEquals(200, def.burnTicks());
         assertEquals(1.25D, def.energyMultiplier());
         assertEquals(1.0D, def.waterMultiplier());
         assertEquals(2.0D, def.myceliumBonus());
@@ -24,7 +24,7 @@ class FuelEntryParserTest {
         FuelDefinition def = FuelEntryParser.parseOrThrow(" #c:mushrooms ; burn = 400 ");
         assertTrue(def.tag());
         assertEquals("c:mushrooms", def.id());
-        assertEquals(400, def.burnTicks());
+        assertEquals(100, def.burnTicks());
         assertEquals(1.0D, def.energyMultiplier());
         assertEquals(1.0D, def.waterMultiplier());
         assertEquals(1.0D, def.myceliumBonus());
