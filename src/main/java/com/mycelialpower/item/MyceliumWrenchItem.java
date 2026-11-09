@@ -133,7 +133,7 @@ public class MyceliumWrenchItem extends Item {
         }
         int used = stack.getOrDefault(ModDataComponents.WRENCH_USES.get(), 0) + 1;
         if (LinkRules.remainingUses(durability, used) <= 0) {
-            player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 1.0F);
+            player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, 0.8F, 1.0F);
             stack.shrink(1);
             player.sendOverlayMessage(Component.translatable("message.mycelialpower.wrench_broke").withStyle(ChatFormatting.RED));
         } else {
