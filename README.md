@@ -2,7 +2,7 @@
 
 A NeoForge mod for **Minecraft 26.1.2** (Java 25) that adds the **Mycelial Generator**.
 
-> **This is the `port/minecraft-26.1.2` branch.** It is an unverified port of the 1.21.1 version. See **[PORTING.md](PORTING.md)** for what changed and what still needs testing. The 1.21.1 version lives on the `claude/mycelial-power-generator-wipojt` branch.
+> **This is the `port/minecraft-26.1.2` branch.** It is a port of the 1.21.1 version that builds and runs; in-game testing is still in progress. See **[PORTING.md](PORTING.md)** for what changed and what still needs testing. The 1.21.1 version lives on the `claude/mycelial-power-generator-wipojt` branch.
 
 * Burns **mushrooms** and **water** to produce **Forge Energy (FE)**.
 * Generators touching on any of their six faces form a **network** whose output grows **exponentially**:

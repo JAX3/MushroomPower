@@ -2,7 +2,7 @@
 
 This branch (`port/minecraft-26.1.2`) is the Mycelial Power 1.21.1 mod ported to **Minecraft 26.1.2** with **NeoForge 26.1.2.126**. The 1.21.1 version stays on `claude/mycelial-power-generator-wipojt`.
 
-> **Status: written but not yet compiled.** The development sandbox could not download NeoForge, Minecraft or JEI, so this port was written against NeoForge's 26.1.2 source code, the official 26.1.2 MDK, JEI's 26.1 API source and NeoForge's porting guides for every version from 1.21.2 to 26.1. Expect a few compile errors on the first `./gradlew build`; send them over and they can be fixed quickly.
+> **Status: builds and runs.** The port was written against NeoForge's 26.1.2 source code, the official 26.1.2 MDK, JEI's 26.1 API source and NeoForge's porting guides for every version from 1.21.2 to 26.1. The first local build had one compile error (`SoundEvents.ITEM_BREAK` is now a `Holder`), which is fixed. The game now starts with the mod. The GameTests and the manual checks in `TESTING.md` have not been confirmed on this branch yet.
 
 ## Versions
 
