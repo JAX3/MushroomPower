@@ -215,5 +215,12 @@
   "mycelialpower.configuration.hugeMushroomEnabled": "Huge mushroom enabled",
   "mycelialpower.configuration.hugeMushroomChance": "Huge mushroom chance",
   "mycelialpower.configuration.hugeMushroomRedRatio": "Huge mushroom red ratio",
-  "mycelialpower.configuration.hugeMushroomMinDistance": "Huge mushroom min distance"
+  "mycelialpower.configuration.hugeMushroomMinDistance": "Huge mushroom min distance",
+  "jade.mycelialpower.state": "State: %s",
+  "jade.mycelialpower.generation": "+%s FE/t",
+  "jade.mycelialpower.fuel": "Burning: %s (%s left)",
+  "jade.mycelialpower.network": "Network: %s linked, %s active (x%s)",
+  "jade.mycelialpower.network_total": "Network total: %s FE/t",
+  "config.jade.plugin_mycelialpower.generator_info": "Generator info",
+  "config.jade.plugin_mycelialpower.generator_fuel": "Generator fuel progress"
 }

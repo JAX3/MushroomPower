@@ -88,6 +88,17 @@ Every 100 running ticks a generator tries to convert a dirt block with air above
 
 ---
 
+## Jade (optional)
+With [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) installed (26.3.x for NeoForge), looking at a Mycelial Generator shows:
+- **State** (Running, No fuel, No water, Energy full) and the **FE/t** it is generating.
+- The **mushroom burning** and how long it has left, with a fuel progress bar.
+- **Network** size, active generators and scaling, and the network's total FE/t when several generators are linked.
+- Stored **energy**, the **water tank** and the **fuel slots**. These come from Jade's built-in support for NeoForge's energy, fluid and item capabilities.
+
+![Jade on a Mycelial Generator](docs/screenshots/jade_generator.png)
+
+Each part can be switched off in Jade's settings under *Plugins → Mycelial Power*. Jade is optional: the mod runs fine without it.
+
 ## Configuration
 
 See **[TESTING.md](TESTING.md)** for the test plan and **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** for every option, and [docs/mycelialpower-server.toml](docs/mycelialpower-server.toml) for the default file. Edits to `<world>/serverconfig/mycelialpower-server.toml` apply while the server runs. JEI refreshes when you rejoin.

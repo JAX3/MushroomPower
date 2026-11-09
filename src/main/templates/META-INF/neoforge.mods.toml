@@ -33,3 +33,11 @@ type = "optional"
 versionRange = "${jei_version_range}"
 ordering = "AFTER"
 side = "CLIENT"
+
+# Jade is optional. Shows generator state, output, fuel and network info when looking at a generator.
+[[dependencies.${mod_id}]]
+modId = "jade"
+type = "optional"
+versionRange = "${jade_version_range}"
+ordering = "NONE"
+side = "BOTH"

@@ -25,6 +25,7 @@ Branch `port/minecraft-26.3` builds on the 26.1.2 port below, updated for **Mine
 - **Recipe advancements:** the `minecraft:recipe_unlocked` condition key `recipe` became `recipes`. The old key stopped the world from loading, which the GameTests caught.
 - **Loot table format:** 26.3 renamed pool `conditions` (a list) to `condition` (a single object with `type`), and `functions` to `modifier`. The old keys are silently ignored rather than rejected, so the "survives explosion" rule was being dropped. The table was rewritten in the 26.3 format.
 - **Build:** JEI 31's runtime needs `net.mezzdev.config` from the BlameJared maven, which was added to the repository filter.
+- **Jade support (new):** optional integration with Jade 26.3.5 from Modrinth's maven. It shows state, FE/t, burning fuel with a progress bar, and network info. Jade's provider rules for 26.3 apply: server-data and client-tooltip providers must be separate classes.
 - **Mod icon:** the deprecated `logoFile` was replaced with `iconFile` (plus `iconBlur=false`), so the logo appears as the mod-list icon.
 
 # Port to Minecraft 26.1.2 / NeoForge 26.1.2
