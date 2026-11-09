@@ -57,8 +57,8 @@ While it runs, a generator tries every few seconds to turn a nearby dirt block i
 
 | Fuel | Burn time | Energy | FE/t (single generator) | FE per item |
 |---|---|---|---|---|
-| Brown Mushroom | 20 s | ×1.0 | 200 | 80,000 |
-| Red Mushroom | 30 s | ×1.25 | 250 | 150,000 |
+| Brown Mushroom | 10 s | ×1.0 | 200 | 40,000 |
+| Red Mushroom | 5 s | ×1.25 | 250 | 25,000 |
 
 Add mushrooms from other mods with one config line, no code needed:
 
